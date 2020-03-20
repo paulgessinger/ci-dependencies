@@ -16,27 +16,25 @@ jobs:
       - name: Install dependencies
         run: >
           brew install boost eigen cmake
-          && curl -SL https://root.cern/download/root_v6.20.02.macosx64-10.15-clang110.tar.gz | tar -xzC .
-          && curl -SL http://geant4-data.web.cern.ch/geant4-data/releases/lib4.10.6.p01/Darwin-clang11.0.0-Catalina.tar.gz | tar -xzC .
       - name: Build ROOT
         run: >
           echo ${ROOT_VERSION} \
-          && curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . \
-          && mv root-* root_src \
-          && mkdir root_build && cd root_build \
-          && cmake ../root_src \
-                    -DCMAKE_CXX_STANDARD=17 \
-              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-              -Dx11=ON \
-                    -Dfftw3=ON \
-                    -Dgdml=ON \
-                    -Dminuit2=ON \
-                    -Dopengl=ON \
-                    -Droofit=ON \
-                    -Dxml=ON \
-          && make -j$(nproc) \
-          && make install \
-          && rm -rf /root_src /root_build \
+          && curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
+          && mv root-* root_src 
+          && mkdir root_build && cd root_build 
+          && cmake ../root_src 
+                    -DCMAKE_CXX_STANDARD=17 
+              -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} 
+              -Dx11=ON 
+                    -Dfftw3=ON 
+                    -Dgdml=ON 
+                    -Dminuit2=ON 
+                    -Dopengl=ON 
+                    -Droofit=ON 
+                    -Dxml=ON 
+          && make -j$(nproc) 
+          && make install 
+          && rm -rf /root_src /root_build 
 
 #          && curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz \
 #          | tar -xzC . \
