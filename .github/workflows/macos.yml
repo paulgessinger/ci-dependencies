@@ -15,7 +15,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Install dependencies
         run: >
-          brew install boost eigen cmake
+          brew install boost eigen cmake xerces-c
+          && mkdir -p $INSTALL_DIR
       - name: Build ROOT
         run: >
           curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
