@@ -36,7 +36,7 @@ jobs:
                     -Dxml=ON \
           && make -j$(nproc) \
           && make install \
-          && rm -rf /root_src /root_build
+          && rm -rf /root_src /root_build \
 
           && curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz \
           | tar -xzC . \
@@ -48,7 +48,7 @@ jobs:
                -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
           && make -j$(nproc) \
           && make install \
-          && rm -rf /geant4_src /geant4_build
+          && rm -rf /geant4_src /geant4_build \
 
           && curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz \
           | tar -xzC . \
