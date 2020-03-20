@@ -38,28 +38,28 @@ jobs:
           && make install \
           && rm -rf /root_src /root_build \
 
-          && curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz \
-          | tar -xzC . \
-          && mv geant4-* geant4_src \
-          && mkdir geant4_build && cd geant4_build \
-          && cmake ../geant4_src \
-               -DGEANT4_USE_GDML=ON \
-               -DGEANT4_BUILD_CXXSTD=17 \
-               -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-          && make -j$(nproc) \
-          && make install \
-          && rm -rf /geant4_src /geant4_build \
-
-          && curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz \
-          | tar -xzC . \
-          && mv DD4hep-* dd4hep_src \
-          && mkdir dd4hep_build && cd dd4hep_build \
-          && cmake ../dd4hep_src \
-           -DDD4HEP_USE_GEANT4=ON \
-           -DCMAKE_CXX_STANDARD=17 \
-           -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
-          && make -j$(nproc) \
-          && make install \
-          && rm -rf /dd4hep_src /dd4hep_build
+#          && curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz \
+#          | tar -xzC . \
+#          && mv geant4-* geant4_src \
+#          && mkdir geant4_build && cd geant4_build \
+#          && cmake ../geant4_src \
+#               -DGEANT4_USE_GDML=ON \
+#               -DGEANT4_BUILD_CXXSTD=17 \
+#               -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+#          && make -j$(nproc) \
+#          && make install \
+#          && rm -rf /geant4_src /geant4_build \
+#
+#          && curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz \
+#          | tar -xzC . \
+#          && mv DD4hep-* dd4hep_src \
+#          && mkdir dd4hep_build && cd dd4hep_build \
+#          && cmake ../dd4hep_src \
+#           -DDD4HEP_USE_GEANT4=ON \
+#           -DCMAKE_CXX_STANDARD=17 \
+#           -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} \
+#          && make -j$(nproc) \
+#          && make install \
+#          && rm -rf /dd4hep_src /dd4hep_build
 
 
