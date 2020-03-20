@@ -20,8 +20,7 @@ jobs:
           && curl -SL http://geant4-data.web.cern.ch/geant4-data/releases/lib4.10.6.p01/Darwin-clang11.0.0-Catalina.tar.gz | tar -xzC .
       - name: Build ROOT
         run: >
-          curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz \
-          | tar -xzC . \
+          curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . \
           && mv root-* root_src \
           && mkdir root_build && cd root_build \
           && cmake ../root_src \
