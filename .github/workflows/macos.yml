@@ -18,8 +18,7 @@ jobs:
           brew install boost eigen cmake
       - name: Build ROOT
         run: >
-          echo ${ROOT_VERSION} \
-          && curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
+          curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
           && mv root-* root_src 
           && mkdir root_build && cd root_build 
           && cmake ../root_src 
@@ -36,7 +35,9 @@ jobs:
           && make install 
           && rm -rf /root_src /root_build 
 
-          && curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz | tar -xzC .
+      - name: Build Geant4
+        run: >
+          curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz | tar -xzC .
           && mv geant4-* geant4_src
           && mkdir geant4_build && cd geant4_build
           && cmake ../geant4_src
@@ -47,7 +48,9 @@ jobs:
           && make install
           && rm -rf /geant4_src /geant4_build
 
-          && curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
+      - name: Build DD4hep
+        run: >
+          curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
           && mv DD4hep-* dd4hep_src
           && mkdir dd4hep_build && cd dd4hep_build
           && cmake ../dd4hep_src
