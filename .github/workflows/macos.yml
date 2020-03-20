@@ -58,8 +58,14 @@ jobs:
           -DDD4HEP_USE_GEANT4=ON
           -DCMAKE_CXX_STANDARD=17
           -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+          -DBUILD_DOCS=OFF
           && make -j2
           && make install
           && rm -rf /dd4hep_src /dd4hep_build
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: libs
+          path: ${INSTALL_DIR}
 
 
