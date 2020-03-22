@@ -66,6 +66,6 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: libs
-          path: ${{ INSTALL_DIR}}
+          path: acts-deps
 
 
