@@ -63,9 +63,12 @@ jobs:
           && make install
           && rm -rf /dd4hep_src /dd4hep_build
 
+      - name: Make tarball
+        run: cd acts-deps && tar zxcf ../deps.tar.gz .
+
       - uses: actions/upload-artifact@v1
         with:
           name: libs
-          path: acts-deps
+          path: deps.tar.gz
 
 
