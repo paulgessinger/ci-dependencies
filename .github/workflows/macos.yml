@@ -34,7 +34,6 @@ jobs:
           -Dxml=ON 
           && make -j2
           && make install 
-          && rm -rf /root_src /root_build 
 
       - name: Build Geant4
         run: >
@@ -47,7 +46,6 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR}
           && make -j2
           && make install
-          && rm -rf /geant4_src /geant4_build
 
       - name: Build DD4hep
         run: >
@@ -61,10 +59,39 @@ jobs:
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
-          && rm -rf /dd4hep_src /dd4hep_build
+
+      - name: Build HepMC
+        run: >
+          curl -SL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/3.2.1/HepMC3-3.2.1.tar.gz | tar -xzC
+          && mv HepMC* hepmc_src
+          && mkdir hepmc_build && cd hepmc_build
+          && cmake ../hepmc_src
+          -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR}
+          -DHEPMC3_ENABLE_PYTHON=OFF
+          && make -j2
+          && make install
+
+      - name: Build HepPDT
+        run: >
+          curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8244.tgz | tar -xzC .
+          && mv HepPDT* heppdt_src
+          && cd heppdt_src
+          && ./configure --prefix=$PWD/../${INSTALL_DIR}
+          && make -j2
+          && make install
+
+      - name: Build Pythia8
+        run: >
+          curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8244.tgz | tar -xzC .
+          && mv pythia8244 pythia8_src
+          && cd pythia8_src
+          && ./configure --prefix=$PWD/../${INSTALL_DIR}
+          && make -j2
+          && make install
+
 
       - name: Make tarball
-        run: cd acts-deps && tar zxcf ../deps.tar.gz .
+        run: cd acts-deps && tar zcvf ../deps.tar.gz .
 
       - uses: actions/upload-artifact@v1
         with:
