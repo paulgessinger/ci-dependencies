@@ -62,7 +62,7 @@ jobs:
 
       - name: Build HepMC
         run: >
-          curl -SL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/3.2.1/HepMC3-3.2.1.tar.gz | tar -xzC .
+          curl -SL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/3.2.1/HepMC3-3.2.1.tar.gz | tar -xzCj.
           && mv HepMC* hepmc_src
           && mkdir hepmc_build && cd hepmc_build
           && cmake ../hepmc_src
@@ -73,7 +73,7 @@ jobs:
 
       - name: Build HepPDT
         run: >
-          curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8244.tgz | tar -xzC .
+          curl -SL http://lcgapp.cern.ch/project/simu/HepPDT/download/HepPDT-2.06.01.tar.gz | tar -xzC .
           && mv HepPDT* heppdt_src
           && cd heppdt_src
           && ./configure --prefix=$PWD/../${INSTALL_DIR}
