@@ -103,10 +103,10 @@ jobs:
           && make -j2
           && make install
 
-    - uses: actions/upload-artifact@v1
-      with:
-        name: geant4
-        path: install
+      - uses: actions/upload-artifact@v1
+        with:
+          name: geant4
+          path: install
 
   build_dd4hep:
     needs:
