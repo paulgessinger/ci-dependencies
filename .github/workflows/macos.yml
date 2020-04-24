@@ -23,7 +23,7 @@ jobs:
           --with-libraries=program_options,test
           --prefix=../install
           && ./b2 install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
       - uses: actions/upload-artifact@v1
         with:
           name: boost
@@ -58,7 +58,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install 
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
       - uses: actions/upload-artifact@v1
         with:
           name: xercesc
@@ -100,7 +100,7 @@ jobs:
           -Dxml=ON 
           && make -j2
           && make install 
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -137,7 +137,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -187,7 +187,7 @@ jobs:
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -223,7 +223,7 @@ jobs:
           -DHEPMC3_ENABLE_PYTHON=OFF
           && make -j2
           && make install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -241,7 +241,7 @@ jobs:
           && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -259,7 +259,7 @@ jobs:
           && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
-          && tar cf install.tar.gz -C install .
+          && tar cf ../install.tar.gz -C ../install .
 
       - uses: actions/upload-artifact@v1
         with:
