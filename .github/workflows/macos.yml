@@ -28,6 +28,18 @@ jobs:
           name: boost
           path: install
 
+  build_tbb:
+    runs-on: macos-10.15
+    steps:
+      - name: Download
+        run: >
+          curl https://github.com/oneapi-src/oneTBB/releases/download/v2020.2/tbb-2020.2-mac.tgz | tar -xzC .
+      - uses: actions/upload-artifact@v1
+        with:
+          name: tbb
+          path: tbb-2020.2-mac/tbb
+
+
   build_xercesc:
     runs-on: macos-10.15
     steps:
