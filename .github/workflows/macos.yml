@@ -10,10 +10,10 @@ env:
   DD4HEP_VERSION: 01-11-02
   BOOST_VERSION: 1_71_0
   
-runs-on: macos-10.15
 
 jobs:
   build_boost:
+    runs-on: macos-10.15
     steps:
       - name: Build
         run: >
@@ -29,6 +29,7 @@ jobs:
           path: install
 
   build_xercesc:
+    runs-on: macos-10.15
     steps:
       - name: Install dependencies
         run: brew install cmake
@@ -49,6 +50,7 @@ jobs:
           path: install
 
   build_root:
+    runs-on: macos-10.15
     steps:
       - name: Install dependencies
         run: brew install cmake
@@ -78,6 +80,7 @@ jobs:
           path: install
 
   build_geant4:
+    runs-on: macos-10.15
     needs:
       - build_xercesc
     steps:
@@ -109,6 +112,7 @@ jobs:
           path: install
 
   build_dd4hep:
+    runs-on: macos-10.15
     needs:
       - build_geant4
       - build_root
@@ -151,6 +155,7 @@ jobs:
           path: install
 
   build_hepmc3:
+    runs-on: macos-10.15
     steps:
       - name: Install dependencies
         run: brew install cmake
@@ -173,6 +178,7 @@ jobs:
           path: install
 
   build_heppdt:
+    runs-on: macos-10.15
     steps:
       - name: Build HepPDT
         run: >
@@ -189,6 +195,7 @@ jobs:
           path: install
 
   build_pythia8:
+    runs-on: macos-10.15
     steps:
       - name: Build
         run: >
