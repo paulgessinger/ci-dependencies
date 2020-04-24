@@ -43,10 +43,10 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install 
-    - uses: actions/upload-artifact@v1
-      with:
-        name: xercesc
-        path: install
+      - uses: actions/upload-artifact@v1
+        with:
+          name: xercesc
+          path: install
 
   build_root:
     steps:
