@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Download
         run: >
-          curl https://github.com/oneapi-src/oneTBB/releases/download/v2020.2/tbb-2020.2-mac.tgz | tar -xzC .
+          curl -SL https://github.com/oneapi-src/oneTBB/releases/download/v2020.2/tbb-2020.2-mac.tgz | tar -xzC .
       - uses: actions/upload-artifact@v1
         with:
           name: tbb
@@ -63,9 +63,16 @@ jobs:
 
   build_root:
     runs-on: macos-10.15
+    needs:
+      - build_tbb
     steps:
       - name: Install dependencies
         run: brew install cmake
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: tbb
+          path: deps
 
       - name: Build
         run: >
@@ -75,6 +82,7 @@ jobs:
           && cmake ../root_src 
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_CXX_STANDARD=17 
+          -DCMAKE_PREFIX_PATH=../deps
           -DCMAKE_INSTALL_PREFIX=../install
           -Dx11=ON 
           -Dfftw3=ON 
