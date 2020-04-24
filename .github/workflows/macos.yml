@@ -24,9 +24,9 @@ jobs:
           --prefix=../install
           && ./b2 install
       - uses: actions/upload-artifact@v1
-          with:
-            name: boost
-            path: install
+        with:
+          name: boost
+          path: install
 
   build_xercesc:
     steps:
@@ -44,9 +44,9 @@ jobs:
           && make -j2
           && make install 
     - uses: actions/upload-artifact@v1
-        with:
-          name: xercesc
-          path: install
+      with:
+        name: xercesc
+        path: install
 
   build_root:
     steps:
@@ -73,9 +73,9 @@ jobs:
           && make install 
 
       - uses: actions/upload-artifact@v1
-          with:
-            name: root
-            path: install
+        with:
+          name: root
+          path: install
 
   build_geant4:
     needs:
@@ -85,9 +85,9 @@ jobs:
         run: brew install cmake
 
       - uses: actions/download-artifact@v1
-          with:
-            name: xercesc
-            path: deps
+        with:
+          name: xercesc
+          path: deps
                         
       - name: Build Geant4
         run: >
@@ -104,9 +104,9 @@ jobs:
           && make install
 
     - uses: actions/upload-artifact@v1
-        with:
-          name: geant4
-          path: install
+      with:
+        name: geant4
+        path: install
 
   build_dd4hep:
     needs:
@@ -118,17 +118,17 @@ jobs:
         run: brew install cmake
 
       - uses: actions/download-artifact@v1
-          with:
-            name: xercesc
-            path: deps
+        with:
+          name: xercesc
+          path: deps
       - uses: actions/download-artifact@v1
-          with:
-            name: root
-            path: deps
+        with:
+          name: root
+          path: deps
       - uses: actions/download-artifact@v1
-          with:
-            name: geant4
-            path: deps
+        with:
+          name: geant4
+          path: deps
 
       - name: Build DD4hep
         run: >
@@ -146,9 +146,9 @@ jobs:
           && make install
 
       - uses: actions/upload-artifact@v1
-          with:
-            name: dd4hep
-            path: install
+        with:
+          name: dd4hep
+          path: install
 
   build_hepmc3:
     steps:
@@ -168,9 +168,9 @@ jobs:
           && make install
 
       - uses: actions/upload-artifact@v1
-          with:
-            name: hepmc3
-            path: install
+        with:
+          name: hepmc3
+          path: install
 
   build_heppdt:
     steps:
@@ -184,9 +184,9 @@ jobs:
           && make install
 
       - uses: actions/upload-artifact@v1
-          with:
-            name: heppdt
-            path: install
+        with:
+          name: heppdt
+          path: install
 
   build_pythia8:
     steps:
@@ -200,9 +200,9 @@ jobs:
           && make install
 
       - uses: actions/upload-artifact@v1
-          with:
-            name: pythia8
-            path: install
+        with:
+          name: pythia8
+          path: install
 
 
       # - name: Make tarball
