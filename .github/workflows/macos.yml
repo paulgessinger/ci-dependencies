@@ -156,9 +156,16 @@ jobs:
 
   build_hepmc3:
     runs-on: macos-10.15
+    needs:
+      - build_root
     steps:
       - name: Install dependencies
         run: brew install cmake
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: root
+          path: deps
 
       - name: Build
         run: >
@@ -167,6 +174,7 @@ jobs:
           && mkdir hepmc_build && cd hepmc_build
           && cmake ../hepmc_src
           -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH=../deps
           -DCMAKE_INSTALL_PREFIX=../install
           -DHEPMC3_ENABLE_PYTHON=OFF
           && make -j2
