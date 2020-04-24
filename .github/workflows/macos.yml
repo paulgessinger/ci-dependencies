@@ -18,7 +18,7 @@ jobs:
       - name: Build
         run: >
           curl -SL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_${BOOST_VERSION}.tar.gz | tar -xzC .
-          && mv boost_* boot_src
+          && mv boost_* boot_src && cd boost_src
           && ./bootstrap.sh 
           --with-libraries=program_options,test
           --prefix=../install
