@@ -3,28 +3,65 @@ name: macOS
 on:
   - push
 
+env:
+  XERCESC_VERSION: 3.2.2
+  ROOT_VERSION: 6.20.00
+  GEANT4_VERSION: 10.6.1
+  DD4HEP_VERSION: 01-11-02
+  BOOST_VERSION: 1_71_0
+  
+runs-on: macos-10.15
+
 jobs:
-  build:
-    runs-on: macos-10.15
-    env:
-      ROOT_VERSION: 6.20.00
-      GEANT4_VERSION: 10.6.1
-      DD4HEP_VERSION: 01-11-02
-      INSTALL_DIR: acts-deps
+  build_boost:
     steps:
-      - uses: actions/checkout@v1
-      - name: Install dependencies
+      - name: Build
         run: >
-          brew install boost eigen cmake xerces-c
-          && mkdir -p $INSTALL_DIR
-      - name: Build ROOT
+          curl -SL https://dl.bintray.com/boostorg/release/1.72.0/source/boost_${BOOST_VERSION}.tar.gz | tar -xzC .
+          && mv boost_* boot_src
+          && ./bootstrap.sh 
+          --with-libraries=program_options,test
+          --prefix=../install
+          && ./b2 install
+      - uses: actions/upload-artifact@v1
+          with:
+            name: boost
+            path: install
+
+  build_xercesc:
+    steps:
+      - name: Install dependencies
+        run: brew install cmake
+
+      - name: Build
+        run: >
+          curl -SL https://github.com/apache/xerces-c/archive/v${XERCESC_VERSION}.tar.gz | tar -xzC . 
+          && mv xerces-c-* xerces-c_src
+          && mkdir xerces-c_build && cd xerces-c_build
+          && cmake ../xerces-c_src
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX=../install
+          && make -j2
+          && make install 
+    - uses: actions/upload-artifact@v1
+        with:
+          name: xercesc
+          path: install
+
+  build_root:
+    steps:
+      - name: Install dependencies
+        run: brew install cmake
+
+      - name: Build
         run: >
           curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
           && mv root-* root_src 
           && mkdir root_build && cd root_build 
           && cmake ../root_src 
+          -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_CXX_STANDARD=17 
-          -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR} 
+          -DCMAKE_INSTALL_PREFIX=../install
           -Dx11=ON 
           -Dfftw3=ON 
           -Dgdml=ON 
@@ -35,17 +72,63 @@ jobs:
           && make -j2
           && make install 
 
+      - uses: actions/upload-artifact@v1
+          with:
+            name: root
+            path: install
+
+  build_geant4:
+    needs:
+      - build_xercesc
+    steps:
+      - name: Install dependencies
+        run: brew install cmake
+
+      - uses: actions/download-artifact@v1
+          with:
+            name: xercesc
+            path: deps
+                        
       - name: Build Geant4
         run: >
           curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz | tar -xzC .
           && mv geant4-* geant4_src
           && mkdir geant4_build && cd geant4_build
           && cmake ../geant4_src
+          -DCMAKE_BUILD_TYPE=Release
           -DGEANT4_USE_GDML=ON
           -DGEANT4_BUILD_CXXSTD=17
-          -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR}
+          -DCMAKE_PREFIX_PATH=../deps
+          -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install
+
+    - uses: actions/upload-artifact@v1
+        with:
+          name: geant4
+          path: install
+
+  build_dd4hep:
+    needs:
+      - build_geant4
+      - build_root
+      - build_xercesc
+    steps:
+      - name: Install dependencies
+        run: brew install cmake
+
+      - uses: actions/download-artifact@v1
+          with:
+            name: xercesc
+            path: deps
+      - uses: actions/download-artifact@v1
+          with:
+            name: root
+            path: deps
+      - uses: actions/download-artifact@v1
+          with:
+            name: geant4
+            path: deps
 
       - name: Build DD4hep
         run: >
@@ -53,49 +136,81 @@ jobs:
           && mv DD4hep-* dd4hep_src
           && mkdir dd4hep_build && cd dd4hep_build
           && cmake ../dd4hep_src
+          -DCMAKE_BUILD_TYPE=Release
           -DDD4HEP_USE_GEANT4=ON
           -DCMAKE_CXX_STANDARD=17
-          -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR}
+          -DCMAKE_PREFIX_PATH=../deps
+          -DCMAKE_INSTALL_PREFIX=../install
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
 
-      - name: Build HepMC
+      - uses: actions/upload-artifact@v1
+          with:
+            name: dd4hep
+            path: install
+
+  build_hepmc3:
+    steps:
+      - name: Install dependencies
+        run: brew install cmake
+
+      - name: Build
         run: >
           curl -SL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/3.2.1/HepMC3-3.2.1.tar.gz | tar -xzC .
           && mv HepMC* hepmc_src
           && mkdir hepmc_build && cd hepmc_build
           && cmake ../hepmc_src
-          -DCMAKE_INSTALL_PREFIX=../${INSTALL_DIR}
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX=../install
           -DHEPMC3_ENABLE_PYTHON=OFF
           && make -j2
           && make install
 
+      - uses: actions/upload-artifact@v1
+          with:
+            name: hepmc3
+            path: install
+
+  build_heppdt:
+    steps:
       - name: Build HepPDT
         run: >
           curl -SL http://lcgapp.cern.ch/project/simu/HepPDT/download/HepPDT-2.06.01.tar.gz | tar -xzC .
           && mv HepPDT* heppdt_src
           && cd heppdt_src
-          && ./configure --prefix=$PWD/../${INSTALL_DIR}
+          && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
 
-      - name: Build Pythia8
+      - uses: actions/upload-artifact@v1
+          with:
+            name: heppdt
+            path: install
+
+  build_pythia8:
+    steps:
+      - name: Build
         run: >
           curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8244.tgz | tar -xzC .
           && mv pythia8244 pythia8_src
           && cd pythia8_src
-          && ./configure --prefix=$PWD/../${INSTALL_DIR}
+          && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
 
-
-      - name: Make tarball
-        run: cd acts-deps && tar zcvf ../deps.tar.gz .
-
       - uses: actions/upload-artifact@v1
-        with:
-          name: libs
-          path: deps.tar.gz
+          with:
+            name: pythia8
+            path: install
+
+
+      # - name: Make tarball
+        # run: cd acts-deps && tar zcvf ../deps.tar.gz .
+
+      # - uses: actions/upload-artifact@v1
+        # with:
+          # name: libs
+          # path: deps.tar.gz
 
 
