@@ -79,6 +79,8 @@ jobs:
 
       - run: >
           mkdir deps
+          && ls
+          && ls tbb.tar.gz
           && tar xf tbb.tar.gz -C deps
 
       - name: Build
