@@ -23,10 +23,11 @@ jobs:
           --with-libraries=program_options,test
           --prefix=../install
           && ./b2 install
+          && tar cf install.tar.gz -C install .
       - uses: actions/upload-artifact@v1
         with:
           name: boost
-          path: install
+          path: install.tar.gz
 
   build_tbb:
     runs-on: macos-10.15
@@ -34,10 +35,11 @@ jobs:
       - name: Download
         run: >
           curl -SL https://github.com/oneapi-src/oneTBB/releases/download/v2020.2/tbb-2020.2-mac.tgz | tar -xzC .
+          && tar cf install.tar.gz -C tbb .
       - uses: actions/upload-artifact@v1
         with:
           name: tbb
-          path: tbb
+          path: install.tar.gz
 
 
   build_xercesc:
@@ -56,10 +58,11 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install 
+          && tar cf install.tar.gz -C install .
       - uses: actions/upload-artifact@v1
         with:
           name: xercesc
-          path: install
+          path: install.tar.gz
 
   build_root:
     runs-on: macos-10.15
@@ -72,7 +75,11 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: tbb
-          path: deps
+          path: tbb.tar.gz
+
+      - run: >
+          mkdir deps
+          && tar xf tbb.tar.gz -C deps
 
       - name: Build
         run: >
@@ -93,11 +100,12 @@ jobs:
           -Dxml=ON 
           && make -j2
           && make install 
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: root
-          path: install
+          path: install.tar.gz
 
   build_geant4:
     runs-on: macos-10.15
@@ -110,7 +118,11 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: xercesc
-          path: deps
+          path: xercesc.tar.gz
+
+      - run: >
+          mkdir deps
+          && tar xf xercesc.tar.gz -C deps
                         
       - name: Build Geant4
         run: >
@@ -125,11 +137,12 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=../install
           && make -j2
           && make install
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: geant4
-          path: install
+          path: install.tar.gz
 
   build_dd4hep:
     runs-on: macos-10.15
@@ -144,15 +157,21 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: xercesc
-          path: deps
+          path: xercesc.tar.gz
       - uses: actions/download-artifact@v1
         with:
           name: root
-          path: deps
+          path: root.tar.gz
       - uses: actions/download-artifact@v1
         with:
           name: geant4
-          path: deps
+          path: geant4.tar.gz
+
+      - run: >
+          mkdir deps
+          && tar xf xercesc.tar.gz -C deps
+          && tar xf root.tar.gz -C deps
+          && tar xf geant4.tar.gz -C deps
 
       - name: Build DD4hep
         run: >
@@ -168,11 +187,12 @@ jobs:
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: dd4hep
-          path: install
+          path: install.tar.gz
 
   build_hepmc3:
     runs-on: macos-10.15
@@ -185,7 +205,11 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: root
-          path: deps
+          path: root.tar.gz
+
+      - run: >
+          mkdir deps
+          && tar xf root.tar.gz -C deps
 
       - name: Build
         run: >
@@ -199,11 +223,12 @@ jobs:
           -DHEPMC3_ENABLE_PYTHON=OFF
           && make -j2
           && make install
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: hepmc3
-          path: install
+          path: install.tar.gz
 
   build_heppdt:
     runs-on: macos-10.15
@@ -216,11 +241,12 @@ jobs:
           && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: heppdt
-          path: install
+          path: install.tar.gz
 
   build_pythia8:
     runs-on: macos-10.15
@@ -233,11 +259,12 @@ jobs:
           && ./configure --prefix=$PWD/../install
           && make -j2
           && make install
+          && tar cf install.tar.gz -C install .
 
       - uses: actions/upload-artifact@v1
         with:
           name: pythia8
-          path: install
+          path: install.tar.gz
 
 
       # - name: Make tarball
