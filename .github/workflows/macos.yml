@@ -4,6 +4,7 @@ on:
   - push
 
 env:
+  INSTALL_DIR: /usr/local/acts
   XERCESC_VERSION: 3.2.2
   ROOT_VERSION: 6.20.00
   GEANT4_VERSION: 10.6.1
@@ -25,9 +26,9 @@ jobs:
           && mv boost_* boost_src && cd boost_src
           && ./bootstrap.sh 
           --with-libraries=program_options,test
-          --prefix=../install
+          --prefix=${INSTALL_DIR}
           && ./b2 install
-          && tar czf ../boost.tar.gz -C ../install .
+          && tar czf ../boost.tar.gz -C ${INSTALL_DIR} .
       - uses: actions/upload-artifact@v1
         with:
           name: boost
@@ -59,10 +60,10 @@ jobs:
           && mkdir xerces-c_build && cd xerces-c_build
           && cmake ../xerces-c_src
           -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_INSTALL_PREFIX=../install
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           && make -j2
           && make install 
-          && tar czf ../xercesc.tar.gz -C ../install .
+          && tar czf ../xercesc.tar.gz -C ${INSTALL_DIR} .
       - uses: actions/upload-artifact@v1
         with:
           name: xercesc
@@ -82,8 +83,8 @@ jobs:
           path: .
 
       - run: >
-          mkdir deps
-          && tar xf tbb.tar.gz -C deps
+          mkdir ${INSTALL_DIR}
+          && tar xf tbb.tar.gz -C $INSTALL_DIR
 
       - name: Build
         run: >
@@ -93,8 +94,8 @@ jobs:
           && cmake ../root_src 
           -DCMAKE_BUILD_TYPE=Release
           -DCMAKE_CXX_STANDARD=17 
-          -DCMAKE_PREFIX_PATH=../deps
-          -DCMAKE_INSTALL_PREFIX=../install
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           -Dx11=ON 
           -Dfftw3=ON 
           -Dgdml=ON 
@@ -104,7 +105,7 @@ jobs:
           -Dxml=ON 
           && make -j2
           && make install 
-          && tar czf ../root.tar.gz -C ../install .
+          && tar czf ../root.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -125,8 +126,8 @@ jobs:
           path: .
 
       - run: >
-          mkdir deps
-          && tar xf xercesc.tar.gz -C deps
+          mkdir ${INSTALL_DIR}
+          && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
                         
       - name: Build Geant4
         run: >
@@ -137,11 +138,11 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DGEANT4_USE_GDML=ON
           -DGEANT4_BUILD_CXXSTD=17
-          -DCMAKE_PREFIX_PATH=../deps
-          -DCMAKE_INSTALL_PREFIX=../install
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           && make -j2
           && make install
-          && tar czf ../geant4.tar.gz -C ../install .
+          && tar czf ../geant4.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -176,11 +177,11 @@ jobs:
           path: .
 
       - run: >
-          mkdir deps
-          && tar xf xercesc.tar.gz -C deps
-          && tar xf root.tar.gz -C deps
-          && tar xf geant4.tar.gz -C deps
-          && tar xf boost.tar.gz -C deps
+          mkdir ${INSTALL_DIR}
+          && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
+          && tar xf root.tar.gz -C ${INSTALL_DIR}
+          && tar xf geant4.tar.gz -C ${INSTALL_DIR}
+          && tar xf boost.tar.gz -C ${INSTALL_DIR}
 
       - name: Build DD4hep
         run: >
@@ -191,12 +192,12 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -DDD4HEP_USE_GEANT4=ON
           -DCMAKE_CXX_STANDARD=17
-          -DCMAKE_PREFIX_PATH=../deps
-          -DCMAKE_INSTALL_PREFIX=../install
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
-          && tar czf ../dd4hep.tar.gz -C ../install .
+          && tar czf ../dd4hep.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -217,8 +218,8 @@ jobs:
           path: .
 
       - run: >
-          mkdir deps
-          && tar xf root.tar.gz -C deps
+          mkdir ${INSTALL_DIR}
+          && tar xf root.tar.gz -C ${INSTALL_DIR}
 
       - name: Build
         run: >
@@ -227,12 +228,12 @@ jobs:
           && mkdir hepmc_build && cd hepmc_build
           && cmake ../hepmc_src
           -DCMAKE_BUILD_TYPE=Release
-          -DCMAKE_PREFIX_PATH=../deps
-          -DCMAKE_INSTALL_PREFIX=../install
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           -DHEPMC3_ENABLE_PYTHON=OFF
           && make -j2
           && make install
-          && tar czf ../hepmc3.tar.gz -C ../install .
+          && tar czf ../hepmc3.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -247,10 +248,10 @@ jobs:
           curl -SL http://lcgapp.cern.ch/project/simu/HepPDT/download/HepPDT-${HEPPDT_VERSION}.tar.gz | tar -xzC .
           && mv HepPDT* heppdt_src
           && cd heppdt_src
-          && ./configure --prefix=$PWD/../install
+          && ./configure --prefix=${INSTALL_DIR}
           && make -j2
           && make install
-          && tar czf ../heppdt.tar.gz -C ../install .
+          && tar czf ../heppdt.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -265,10 +266,10 @@ jobs:
           curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
           && mv pythia8244 pythia8_src
           && cd pythia8_src
-          && ./configure --prefix=$PWD/../install
+          && ./configure --prefix=${INSTALL_DIR}
           && make -j2
           && make install
-          && tar czf ../pythia8.tar.gz -C ../install .
+          && tar czf ../pythia8.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
@@ -328,19 +329,19 @@ jobs:
 
       - name: Unpack
         run: >
-          mkdir deps
-          && tar xf tbb.tar.gz -C deps
-          && tar xf boost.tar.gz -C deps
-          && tar xf xercesc.tar.gz -C deps
-          && tar xf heppdt.tar.gz -C deps
-          && tar xf pythia8.tar.gz -C deps
-          && tar xf root.tar.gz -C deps
-          && tar xf geant4.tar.gz -C deps
-          && tar xf hepmc3.tar.gz -C deps
-          && tar xf dd4hep.tar.gz -C deps
+          mkdir ${INSTALL_DIR}
+          && tar xf tbb.tar.gz -C ${INSTALL_DIR}
+          && tar xf boost.tar.gz -C ${INSTALL_DIR}
+          && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
+          && tar xf heppdt.tar.gz -C ${INSTALL_DIR}
+          && tar xf pythia8.tar.gz -C ${INSTALL_DIR}
+          && tar xf root.tar.gz -C ${INSTALL_DIR}
+          && tar xf geant4.tar.gz -C ${INSTALL_DIR}
+          && tar xf hepmc3.tar.gz -C ${INSTALL_DIR}
+          && tar xf dd4hep.tar.gz -C ${INSTALL_DIR}
 
       - name: Make combined tarball
-        run: tar czf deps.tar.gz -C deps .
+        run: tar czf deps.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
