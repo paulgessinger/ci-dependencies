@@ -20,6 +20,7 @@ jobs:
     runs-on: macos-10.15
 
     steps:
+      - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
       - name: Build
         run: >
           curl -SL https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//./_}.tar.gz | tar -xzC .
@@ -40,6 +41,7 @@ jobs:
       - name: Download
         run: >
           curl -SL https://github.com/oneapi-src/oneTBB/releases/download/v${TBB_VERSION}/tbb-${TBB_VERSION}-mac.tgz | tar -xzC .
+          && rm tbb/README
           && tar czf tbb.tar.gz -C tbb .
       - uses: actions/upload-artifact@v1
         with:
@@ -52,6 +54,8 @@ jobs:
     steps:
       - name: Install dependencies
         run: brew install cmake
+
+      - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
 
       - name: Build
         run: >
@@ -83,7 +87,7 @@ jobs:
           path: .
 
       - run: >
-          mkdir ${INSTALL_DIR}
+          sudo mkdir ${INSTALL_DIR} && sudo chown -R $USER ${INSTALL_DIR}
           && tar xf tbb.tar.gz -C $INSTALL_DIR
 
       - name: Build
@@ -126,7 +130,7 @@ jobs:
           path: .
 
       - run: >
-          mkdir ${INSTALL_DIR}
+          sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
           && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
                         
       - name: Build Geant4
@@ -156,6 +160,8 @@ jobs:
       - build_root
       - build_xercesc
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install dependencies
         run: brew install cmake
 
@@ -177,7 +183,7 @@ jobs:
           path: .
 
       - run: >
-          mkdir ${INSTALL_DIR}
+          sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
           && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
           && tar xf root.tar.gz -C ${INSTALL_DIR}
           && tar xf geant4.tar.gz -C ${INSTALL_DIR}
@@ -187,6 +193,9 @@ jobs:
         run: >
           curl -SL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
           && mv DD4hep-* dd4hep_src
+          && pushd dd4hep_src
+          && cat ../dd4hep_1_11_2_tbb_fix.patch | patch -p1
+          && popd
           && mkdir dd4hep_build && cd dd4hep_build
           && cmake ../dd4hep_src
           -DCMAKE_BUILD_TYPE=Release
@@ -218,7 +227,7 @@ jobs:
           path: .
 
       - run: >
-          mkdir ${INSTALL_DIR}
+          sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
           && tar xf root.tar.gz -C ${INSTALL_DIR}
 
       - name: Build
@@ -243,6 +252,7 @@ jobs:
   build_heppdt:
     runs-on: macos-10.15
     steps:
+      - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
       - name: Build HepPDT
         run: >
           curl -SL http://lcgapp.cern.ch/project/simu/HepPDT/download/HepPDT-${HEPPDT_VERSION}.tar.gz | tar -xzC .
@@ -261,6 +271,7 @@ jobs:
   build_pythia8:
     runs-on: macos-10.15
     steps:
+      - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
       - name: Build
         run: >
           curl -SL http://home.thep.lu.se/~torbjorn/pythia8/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
@@ -329,7 +340,7 @@ jobs:
 
       - name: Unpack
         run: >
-          mkdir ${INSTALL_DIR}
+          sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
           && tar xf tbb.tar.gz -C ${INSTALL_DIR}
           && tar xf boost.tar.gz -C ${INSTALL_DIR}
           && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
