@@ -26,7 +26,7 @@ jobs:
           curl -SL https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//./_}.tar.gz | tar -xzC .
           && mv boost_* boost_src && cd boost_src
           && ./bootstrap.sh 
-          --with-libraries=program_options,test,filesystem
+          --with-libraries=program_options,test,filesystem,system
           --prefix=${INSTALL_DIR}
           && ./b2 install
           && tar czf ../boost.tar.gz -C ${INSTALL_DIR} .
