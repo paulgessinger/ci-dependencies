@@ -326,7 +326,7 @@ jobs:
           && tar xf dd4hep.tar.gz -C ${INSTALL_DIR}
 
       - name: Make combined tarball
-        run: tar czf deps.tar.gz -C ${INSTALL_DIR} .
+        run: tar -c --xz -zf deps.tar.gz -C ${INSTALL_DIR} .
 
       - uses: actions/upload-artifact@v1
         with:
