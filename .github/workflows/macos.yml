@@ -12,7 +12,6 @@ env:
   BOOST_VERSION: 1.72.0
   TBB_VERSION: 2020.2 
   HEPMC_VERSION: 3.2.1
-  HEPPDT_VERSION: 2.06.01
   PYTHIA8_VERSION: 244
 
 jobs:
@@ -248,24 +247,6 @@ jobs:
           name: hepmc3
           path: hepmc3.tar.gz
 
-  build_heppdt:
-    runs-on: macos-10.15
-    steps:
-      - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
-      - name: Build HepPDT
-        run: >
-          curl -SL http://lcgapp.cern.ch/project/simu/HepPDT/download/HepPDT-${HEPPDT_VERSION}.tar.gz | tar -xzC .
-          && mv HepPDT* heppdt_src
-          && cd heppdt_src
-          && ./configure --prefix=${INSTALL_DIR}
-          && make -j2
-          && make install
-          && tar czf ../heppdt.tar.gz -C ${INSTALL_DIR} .
-
-      - uses: actions/upload-artifact@v1
-        with:
-          name: heppdt
-          path: heppdt.tar.gz
 
   build_pythia8:
     runs-on: macos-10.15
@@ -293,7 +274,6 @@ jobs:
       - build_boost
       - build_tbb
       - build_xercesc
-      - build_heppdt
       - build_pythia8
       - build_root
       - build_geant4
@@ -311,10 +291,6 @@ jobs:
       - uses: actions/download-artifact@v1
         with:
           name: xercesc
-          path: .
-      - uses: actions/download-artifact@v1
-        with:
-          name: heppdt
           path: .
       - uses: actions/download-artifact@v1
         with:
@@ -343,7 +319,6 @@ jobs:
           && tar xf tbb.tar.gz -C ${INSTALL_DIR}
           && tar xf boost.tar.gz -C ${INSTALL_DIR}
           && tar xf xercesc.tar.gz -C ${INSTALL_DIR}
-          && tar xf heppdt.tar.gz -C ${INSTALL_DIR}
           && tar xf pythia8.tar.gz -C ${INSTALL_DIR}
           && tar xf root.tar.gz -C ${INSTALL_DIR}
           && tar xf geant4.tar.gz -C ${INSTALL_DIR}
