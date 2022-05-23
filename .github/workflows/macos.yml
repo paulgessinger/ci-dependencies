@@ -21,6 +21,8 @@ env:
   TBB_VERSION: 2021.5.0
   HEPMC_VERSION: 3.2.1
   PYTHIA8_VERSION: 307
+  PODIO_VERSION: v00-14-01
+  EDM4HEP_VERSION: v00-04-01
 
 jobs:
   build_boost:
@@ -34,8 +36,6 @@ jobs:
           restore-keys: |
             builddir-${{ runner.os }}-${{ github.job }}-${{ env.BOOST_VERSION }}
             builddir-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
 
@@ -81,8 +81,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
 
@@ -120,8 +118,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.ROOT_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - uses: actions/download-artifact@v3
         with:
@@ -175,8 +171,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.GEANT4_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - uses: actions/download-artifact@v3
         with:
@@ -226,8 +220,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.DD4HEP_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - uses: actions/download-artifact@v3
         with:
@@ -293,8 +285,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.HEPMC_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - uses: actions/download-artifact@v3
         with:
@@ -339,8 +329,6 @@ jobs:
           restore-keys: |
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.PYTHIA8_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
-            ccache-${{ runner.os }}-${{ github.job }}_r2
-            ccache-${{ runner.os }}-${{ github.job }}_
 
       - run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
 
@@ -359,6 +347,72 @@ jobs:
           name: pythia8
           path: pythia8.tar.gz
 
+  build_edm4hep:
+    runs-on: macos-11
+    needs:
+      - build_root
+    steps:
+      - name: Install dependencies
+        run: brew install cmake ccache
+
+      - name: Install Python dependencies
+        run: pip3 install jinja2 pyyaml
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ env.EDM4HEP_VERSION }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ github.job }}-${{ env.EDM4HEP_VERSION }}
+            ccache-${{ runner.os }}-${{ github.job }}-
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: root
+          path: .
+
+      - run: >
+          sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
+          && tar xf root.tar.gz -C ${INSTALL_DIR}
+
+      - name: Build podio
+        run: >
+          curl -SL https://github.com/AIDASoft/podio/archive/refs/tags/${PODIO_VERSION}.tar.gz | tar -xzC .
+          && mv podio-* ${SRC_DIR}
+          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && cmake ${SRC_DIR}
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+          -DBUILD_TESTING=OFF
+          -USE_EXTERNAL_CATCH2=OFF
+          && make -j2
+          && make install
+          && rm -rf ${BUILD_DIR}
+
+      - name: Build edm4hep
+        run: >
+          curl -SL https://github.com/key4hep/EDM4hep/archive/refs/tags/${EDM4HEP_VERSION}.tar.gz | tar -xzC .
+          && mv EDM4hep-* ${SRC_DIR}
+          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && cmake ${SRC_DIR}
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH=${INSTALL_DIR}
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+          -DBUILD_TESTING=OFF
+          -USE_EXTERNAL_CATCH2=OFF
+          && make -j2
+          && make install
+          && tar czf ../edm4hep.tar.gz -C ${INSTALL_DIR} .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: edm4hep
+          path: edm4hep.tar.gz
+
   make_tarball:
     runs-on: ubuntu-latest # we don't need macOS here
     needs: 
@@ -370,6 +424,7 @@ jobs:
       - build_geant4
       - build_hepmc3
       - build_dd4hep
+      - build_edm4hep
     steps:
       - uses: actions/download-artifact@v3
         with:
@@ -403,6 +458,10 @@ jobs:
         with:
           name: dd4hep
           path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: edm4hep
+          path: .
 
       - name: Unpack
         run: sudo mkdir ${INSTALL_DIR} && sudo chown $USER ${INSTALL_DIR}
@@ -414,6 +473,7 @@ jobs:
       - run: tar xf geant4.tar.gz -C ${INSTALL_DIR}
       - run: tar xf hepmc3.tar.gz -C ${INSTALL_DIR}
       - run: tar xf dd4hep.tar.gz -C ${INSTALL_DIR}
+      - run: tar xf edm4hep.tar.gz -C ${INSTALL_DIR}
 
       - name: Make combined tarball
         run: tar -c --xz -f deps.tar.gz -C ${INSTALL_DIR} .
