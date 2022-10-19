@@ -14,6 +14,7 @@ env:
   CC: clang
   CXX: clang++
 
+  PYTHON_VERSION: 3.10.7
   XERCESC_VERSION: 3.2.2
   ROOT_VERSION: 6.26.00
   GEANT4_VERSION: 11.0.0
@@ -26,9 +27,49 @@ env:
   EDM4HEP_VERSION: v00-04-01
 
 jobs:
+  build_python:
+    runs-on: macos-11
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install ccache openssl@3
+          brew unlink gettext
+
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+          restore-keys: |
+            builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+            builddir-${{ runner.os }}-${{ github.job }}-
+
+      - name: Build
+        run: >
+          curl -SL https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz | tar -xzC .
+          && mv Python-* ${SRC_DIR} && cd ${SRC_DIR}
+          && export CC="ccache $CC"
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && ${SRC_DIR}/configure
+          --prefix=${DEPENDENCY_DIR}
+          --enable-optimizations
+          --with-ensurepip=install
+          --with-openssl=$(brew --prefix openssl)
+          && make -j2
+          && sudo make install
+          && tar czf ../python.tar.gz -C ${DEPENDENCY_DIR} .
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: python
+          path: python.tar.gz
+
   build_boost:
     runs-on: macos-11
     steps:
+      - name: Install dependencies
+        run: brew install ccache
+
       - name: Cache build
         uses: actions/cache@v3
         with:
@@ -42,6 +83,8 @@ jobs:
         run: >
           curl -SL https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//./_}.tar.gz | tar -xzC .
           && mv boost_* ${SRC_DIR} && cd ${SRC_DIR}
+          && export CC="ccache $CC"
+          && export CXX="ccache $CXX"
           && ./bootstrap.sh 
           --prefix=${INSTALL_DIR}
           && ./b2 install
@@ -85,7 +128,7 @@ jobs:
         run: >
           curl -SL https://github.com/apache/xerces-c/archive/v${XERCESC_VERSION}.tar.gz | tar -xzC . 
           && mv xerces-c-* ${SRC_DIR}
-          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -102,10 +145,11 @@ jobs:
   build_root:
     runs-on: macos-11
     needs:
+      - build_python
       - build_tbb
     steps:
       - name: Install dependencies
-        run: brew install cmake ccache
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -118,17 +162,23 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
+          name: python
+          path: .
+      - uses: actions/download-artifact@v3
+        with:
           name: tbb
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
 
       - name: Build
         run: >
           curl -SL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz | tar -xzC . 
           && mv root-* ${SRC_DIR}
-          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && export PATH="$DEPENDENCY_DIR/bin:$PATH"
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -180,7 +230,7 @@ jobs:
         run: >
           curl -SL https://github.com/Geant4/geant4/archive/v${GEANT4_VERSION}.tar.gz | tar -xzC .
           && mv geant4-* ${SRC_DIR}
-          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -200,13 +250,11 @@ jobs:
   build_podio:
     runs-on: macos-11
     needs:
+      - build_python
       - build_root
     steps:
       - name: Install dependencies
-        run: brew install cmake ccache
-
-      - name: Install Python dependencies
-        run: pip3 install jinja2 pyyaml
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -219,17 +267,26 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
+          name: python
+          path: .
+      - uses: actions/download-artifact@v3
+        with:
           name: root
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf root.tar.gz -C ${DEPENDENCY_DIR}
+
+      - name: Install Python dependencies
+        run: ${DEPENDENCY_DIR}/bin/pip3 install jinja2 pyyaml
 
       - name: Build podio
         run: >
           curl -SL https://github.com/AIDASoft/podio/archive/refs/tags/${PODIO_VERSION}.tar.gz | tar -xzC .
           && mv podio-* ${SRC_DIR}
           && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && export PATH="$DEPENDENCY_DIR/bin:$PATH"
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -249,14 +306,12 @@ jobs:
   build_edm4hep:
     runs-on: macos-11
     needs:
+      - build_python
       - build_root
       - build_podio
     steps:
       - name: Install dependencies
-        run: brew install cmake ccache
-
-      - name: Install Python dependencies
-        run: pip3 install jinja2 pyyaml
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -269,6 +324,10 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
+          name: python
+          path: .
+      - uses: actions/download-artifact@v3
+        with:
           name: root
           path: .
       - uses: actions/download-artifact@v3
@@ -277,14 +336,28 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf root.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf podio.tar.gz -C ${DEPENDENCY_DIR}
+
+      - name: Install Python dependencies
+        run: ${DEPENDENCY_DIR}/bin/pip3 install jinja2 pyyaml
+      
+      - name: debug
+        run: ls -la ${DEPENDENCY_DIR}
+      - name: debug
+        run: ls -la ${DEPENDENCY_DIR}/bin
+      - name: debug
+        run: echo "$DEPENDENCY_DIR/bin:$PATH"
+      - name: debug
+        run: echo "$PYTHONHOME"
 
       - name: Build edm4hep
         run: >
           curl -SL https://github.com/key4hep/EDM4hep/archive/refs/tags/${EDM4HEP_VERSION}.tar.gz | tar -xzC .
           && mv EDM4hep-* ${SRC_DIR}
           && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && export PATH="$DEPENDENCY_DIR/bin:$PATH"
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -292,6 +365,7 @@ jobs:
           -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
           -DBUILD_TESTING=OFF
           -USE_EXTERNAL_CATCH2=OFF
+          -DPython_EXECUTABLE="$DEPENDENCY_DIR/bin/python3"
           && make -j2
           && make install
           && tar czf ../edm4hep.tar.gz -C ${INSTALL_DIR} .
@@ -304,6 +378,7 @@ jobs:
   build_dd4hep:
     runs-on: macos-11
     needs:
+      - build_python
       - build_boost
       - build_tbb
       - build_xercesc
@@ -313,7 +388,9 @@ jobs:
       - build_edm4hep
     steps:
       - name: Install dependencies
-        run: brew install cmake ccache
+        run: |
+          brew install cmake ccache openssl@3
+          brew unlink gettext
 
       - name: Cache build
         uses: actions/cache@v3
@@ -324,6 +401,10 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.DD4HEP_VERSION }}-r1
             ccache-${{ runner.os }}-${{ github.job }}-
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: boost
@@ -354,6 +435,7 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf boost.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf xercesc.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
@@ -366,7 +448,8 @@ jobs:
         run: >
           curl -SL https://github.com/AIDASoft/DD4hep/archive/refs/tags/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
           && mv DD4hep-* ${SRC_DIR}
-          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && export PATH="$DEPENDENCY_DIR/bin:$PATH"
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -417,7 +500,7 @@ jobs:
         run: >
           curl -SL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/${HEPMC_VERSION}/HepMC3-${HEPMC_VERSION}.tar.gz | tar -xzC .
           && mv HepMC* ${SRC_DIR}
-          && mkdir ${BUILD_DIR} && cd ${BUILD_DIR}
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
           && cmake ${SRC_DIR}
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DCMAKE_BUILD_TYPE=Release
@@ -466,7 +549,7 @@ jobs:
   make_tarball:
     runs-on: ubuntu-latest # we don't need macOS here
     needs: 
-      - build_boost
+      - build_python
       - build_tbb
       - build_xercesc
       - build_root
@@ -477,6 +560,10 @@ jobs:
       - build_edm4hep
       - build_dd4hep
     steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: boost
@@ -519,6 +606,7 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf boost.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf xercesc.tar.gz -C ${DEPENDENCY_DIR}
