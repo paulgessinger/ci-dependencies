@@ -27,6 +27,7 @@ jobs:
       - name: Cache restore
         uses: actions/cache/restore@v3
         with:
+          path: ${{ env.BUILD_DIR }}
           key: builddir-${{ runner.os }}-${{ github.job }}-r1
           restore-keys: |
             builddir-${{ runner.os }}-${{ github.job }}-r1
