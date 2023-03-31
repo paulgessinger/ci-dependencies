@@ -27,7 +27,7 @@ jobs:
       - name: Cache restore
         uses: actions/cache/restore@v3
         with:
-          path: ${{ env.BUILD_DIR }}
+          path: ${{ env.CCACHE_DIR }}
           key: builddir-${{ runner.os }}-${{ github.job }}-r1
           restore-keys: |
             builddir-${{ runner.os }}-${{ github.job }}-r1
@@ -48,5 +48,5 @@ jobs:
       - uses: actions/cache/save@v3
         if: always()
         with:
-          path: ${{ env.BUILD_DIR }}
+          path: ${{ env.CCACHE_DIR }}
           key: builddir-${{ runner.os }}-${{ github.job }}-r1
