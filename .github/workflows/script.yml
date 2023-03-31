@@ -22,7 +22,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential ninja-build ccache
+          && sudo apt-get install -y build-essential ninja-build ccache
 
       - name: Cache restore
         uses: actions/cache/restore@v3
@@ -36,8 +36,8 @@ jobs:
       - name: Build
         run: >
           ccache -z
-          ./build_all.sh $BUILD_DIR $INSTALL_DIR
-          ccache -s
+          && ./build_all.sh $BUILD_DIR $INSTALL_DIR
+          && ccache -s
 
       - uses: actions/upload-artifact@v3
         with:
