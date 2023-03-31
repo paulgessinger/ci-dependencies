@@ -145,7 +145,7 @@ function build_cmake() {
   build $name $version $url "$cmd"
 }
 
-CCACHE=$(command -v ccache)
+CCACHE=$(command -v ccache || true)
 if [ ! -z "$CCACHE" ]; then
   echo "Using ccache: $CCACHE"
   export CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE
