@@ -1,5 +1,7 @@
 #!/bin/bash
 
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}"  )" &> /dev/null && pwd  )
+
 set -u
 set -e
 
@@ -14,7 +16,11 @@ function download() {
 
 
 BUILD_DIR=$1
-PREFIX=$(realpath $2)
+PREFIX=$2
+
+mkdir -p $PREFIX
+mkdir -p $BUILD_DIR
+PREFIX=$(realpath $PREFIX)
 
 
 function group {
@@ -139,6 +145,12 @@ function build_cmake() {
   build $name $version $url "$cmd"
 }
 
+CCACHE=$(command -v ccache)
+if [ ! -z "$CCACHE" ]; then
+  echo "Using ccache: $CCACHE"
+  export CMAKE_CXX_COMPILER_LAUNCHER=$CCACHE
+fi
+
 build_cmake \
   geant4 \
   $GEANT4_VERSION \
@@ -181,8 +193,6 @@ build_cmake \
 
 export CMAKE_PREFIX_PATH+=":$PREFIX/json/$JSON_VERSION"
 
-CCACHE=$(command -v ccache)
-
 build_cmake \
   root \
   $ROOT_VERSION \
@@ -190,7 +200,6 @@ build_cmake \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CXX_STANDARD=17 \
-  -DCMAKE_CXX_COMPILER_LAUNCHER=$CCACHE \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
   -Dfail-on-missing=ON \
   -Dgdml=ON \
@@ -205,6 +214,10 @@ build_cmake \
   -Dpythia8=OFF \
   -Dfftw3=OFF \
   -Dbuiltin_cfitsio=ON \
+  -Dbuiltin_xxhash=ON \
+  -Dbuiltin_afterimage=ON \
+  -Dbuiltin_openssl=ON \
+  -Dbuiltin_ftgl=ON \
   -Dgfal=OFF \
   -Ddavix=OFF \
   -Dbuiltin_vdt=ON \
@@ -235,12 +248,12 @@ build_cmake \
   edm4hep \
   $EDM4HEP_VERSION \
   https://github.com/key4hep/EDM4hep/archive/refs/tags/v${EDM4HEP_VERSION}.tar.gz \
-  --debug-find \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
   -DBUILD_TESTING=OFF \
-  -DUSE_EXTERNAL_CATCH2=OFF
+  -DUSE_EXTERNAL_CATCH2=OFF \
+  '&& pushd $src && curl https://patch-diff.githubusercontent.com/raw/key4hep/EDM4hep/pull/201.patch | patch -p1 && popd'
 
 export CMAKE_PREFIX_PATH+=":$PREFIX/edm4hep/$EDM4HEP_VERSION"
 
