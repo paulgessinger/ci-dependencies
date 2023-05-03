@@ -135,10 +135,17 @@ function build_cmake() {
   name=$1
   version=$2
   url=$3
-  shift 3
+  patch=$4
+  shift 4
   args="$@"
 
-  cmd='cmake -B $bld -S $src'
+  cmd=""
+
+  if [ ! -z "$patch" ]; then 
+    cmd+='pushd $src && curl '"${patch}"' | patch -p1 && popd && '
+  fi
+
+  cmd+='cmake -B $bld -S $src'
   cmd+=" $args"
   cmd+=' && cmake --build $bld && cmake --install $bld'
 
@@ -155,10 +162,11 @@ build_cmake \
   geant4 \
   $GEANT4_VERSION \
   https://gitlab.cern.ch/geant4/geant4/-/archive/v${GEANT4_VERSION}/geant4-v${GEANT4_VERSION}.tar.gz \
+  "" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
-  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_CXX_STANDARD=20 \
   -DGEANT4_BUILD_TLS_MODEL=global-dynamic \
   -DGEANT4_INSTALL_DATA=OFF \
   -DGEANT4_USE_GDML=ON \
@@ -171,6 +179,7 @@ build_cmake \
   hepmc3 \
   $HEPMC3_VERSION \
   https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${HEPMC3_VERSION}.tar.gz \
+  "" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
@@ -189,6 +198,7 @@ build_cmake \
   json \
   $JSON_VERSION \
   https://github.com/nlohmann/json/archive/refs/tags/v${JSON_VERSION}.tar.gz \
+  "" \
   -GNinja -DJSON_BuildTests=OFF -DCMAKE_INSTALL_PREFIX=\$prfx
 
 export CMAKE_PREFIX_PATH+=":$PREFIX/json/$JSON_VERSION"
@@ -197,9 +207,10 @@ build_cmake \
   root \
   $ROOT_VERSION \
   https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz \
+  "" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_CXX_STANDARD=20 \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
   -Dfail-on-missing=ON \
   -Dgdml=ON \
@@ -231,12 +242,13 @@ build_cmake \
   podio \
   $PODIO_VERSION \
   https://github.com/AIDASoft/podio/archive/refs/tags/v${PODIO_VERSION}.tar.gz \
+  "https://github.com/AIDASoft/podio/commit/09d17d49f434e23663137eadacfea4eaa3d58d48.patch" \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_CXX_STANDARD=20 \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
   -DBUILD_TESTING=OFF \
-  -USE_EXTERNAL_CATCH2=OFF
+  -USE_EXTERNAL_CATCH2=OFF \
 
 python3 -m venv $PWD/venv
 source $PWD/venv/bin/activate
@@ -267,7 +279,7 @@ build_cmake \
   https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz \
   -GNinja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_CXX_STANDARD=17 \
+  -DCMAKE_CXX_STANDARD=20 \
   -DCMAKE_INSTALL_PREFIX=\$prfx \
   -DBUILD_TESTING=OFF \
   '-DDD4HEP_BUILD_PACKAGES="DDG4 DDDetectors DDRec UtilityApps"' \
