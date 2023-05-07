@@ -1,0 +1,191 @@
+cmake_minimum_required(VERSION 3.20)
+project(ActsDependencies)
+
+include(ExternalProject)
+
+set(GEANT4_VERSION 11.1.1)
+set(HEPMC3_VERSION 3.2.5)
+set(PYTHIA8_VERSION 309)
+set(JSON_VERSION 3.11.2)
+set(ROOT_VERSION 6.28.02)
+set(PODIO_VERSION 00-16-03)
+set(EDM4HEP_VERSION 00-07-02)
+set(DD4HEP_VERSION 01-25-01)
+
+cmake_policy(SET CMP0135 NEW)
+
+set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
+
+find_package(Python COMPONENTS Interpreter)
+
+ExternalProject_Add(geant4 
+  PREFIX geant4
+  URL https://gitlab.cern.ch/geant4/geant4/-/archive/v${GEANT4_VERSION}/geant4-v${GEANT4_VERSION}.tar.gz
+  URL_HASH SHA1=7d1c4a2577468d32ca04436a977d434c1c69cb93
+  CMAKE_ARGS 
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/geant4/${GEANT4_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DGEANT4_BUILD_TLS_MODEL=global-dynamic
+  -DGEANT4_INSTALL_DATA=OFF
+  -DGEANT4_USE_GDML=ON
+  -DGEANT4_USE_SYSTEM_EXPAT=ON
+  -DGEANT4_USE_SYSTEM_ZLIB=ON
+)
+
+ExternalProject_Add(hepmc3
+  PREFIX hepmc3
+  URL https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${HEPMC3_VERSION}.tar.gz
+  URL_HASH SHA1=d4c12f5d50a507cd60cf2377286cbd23f59f1f84
+  CMAKE_ARGS
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/hepmc3/${HEPMC3_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DHEPMC3_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DHEPMC3_BUILD_STATIC_LIBS=OFF
+  -DHEPMC3_ENABLE_PYTHON=OFF
+  -DHEPMC3_ENABLE_ROOTIO=OFF
+  -DHEPMC3_ENABLE_SEARCH=OFF
+)
+
+ExternalProject_Add(pythia8
+  PREFIX pythia8
+  URL https://pythia.org/download/pythia83/pythia8${PYTHIA8_VERSION}.tgz
+  URL_HASH SHA1=9749e3554a30ff41a52d98811d7cfef689da329d
+  BUILD_IN_SOURCE ON
+  CONFIGURE_COMMAND ./configure --enable-shared --prefix=${CMAKE_INSTALL_PREFIX}/pythia8/${PYTHIA8_VERSION}
+  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/pythia8307-cpp20.patch
+)
+
+ExternalProject_Add(nlohmann_json
+  PREFIX nlohmann_json
+  URL https://github.com/nlohmann/json/archive/refs/tags/v${JSON_VERSION}.tar.gz
+  URL_HASH SHA1=1b0701dc7fdc068aad8ce68fc3e019a038232437
+  CMAKE_ARGS
+  -DJSON_BuildTests=OFF
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/nlohmann_json/${JSON_VERSION}
+)
+
+ExternalProject_Add(root
+  PREFIX root
+  URL https://github.com/root-project/root/archive/f499987.tar.gz
+  URL_HASH SHA1=29e071025dfadf865c31bf2256a383b7cf58b805
+  CMAKE_ARGS
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/root/${ROOT_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -Dfail-on-missing=ON
+  -Dgdml=ON
+  -Dx11=ON
+  -Dpyroot=ON
+  -Ddataframe=ON
+  -Dmysql=OFF
+  -Doracle=OFF
+  -Dpgsql=OFF
+  -Dsqlite=OFF
+  -Dpythia6=OFF
+  -Dpythia8=OFF
+  -Dfftw3=OFF
+  -Dbuiltin_cfitsio=ON
+  -Dbuiltin_xxhash=ON
+  -Dbuiltin_afterimage=ON
+  -Dbuiltin_openssl=ON
+  -Dbuiltin_ftgl=ON
+  -Dgfal=OFF
+  -Ddavix=OFF
+  -Dbuiltin_vdt=ON
+  -Dxrootd=OFF
+  -Dtmva=OFF
+)
+
+file(DOWNLOAD 
+  https://github.com/AIDASoft/podio/commit/09d17d49f434e23663137eadacfea4eaa3d58d48.patch
+  ${CMAKE_CURRENT_BINARY_DIR}/podio.patch
+  EXPECTED_HASH SHA1=6852ffcf5aef2df0d305520d69a7b298464c1ad2
+)
+
+ExternalProject_Add(podio
+  PREFIX podio
+  DEPENDS root
+  URL https://github.com/AIDASoft/podio/archive/refs/tags/v${PODIO_VERSION}.tar.gz
+  URL_HASH SHA1=97e4908d0fce23cf01de1dc7f1921de72319f42c
+  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/podio.patch
+  CMAKE_ARGS
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/podio/${PODIO_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/root/${ROOT_VERSION}
+  -DBUILD_TESTING=OFF
+  -DUSE_EXTERNAL_CATCH2=OFF
+)
+
+file(DOWNLOAD 
+  https://patch-diff.githubusercontent.com/raw/key4hep/EDM4hep/pull/201.patch
+  ${CMAKE_CURRENT_BINARY_DIR}/edm4hep.patch
+  EXPECTED_HASH SHA1=901940d8a2ddcafb37334a0f18c25f557ed4a71f
+)
+
+
+set(venv_dir ${CMAKE_CURRENT_BINARY_DIR}/venv)
+if(NOT IS_DIRECTORY ${venv_dir})
+  execute_process(COMMAND ${Python_EXECUTABLE} -m venv ${venv_dir})
+endif()
+set(python_exe ${venv_dir}/bin/python)
+execute_process(COMMAND ${python_exe} -m pip install jinja2 pyyaml)
+
+ExternalProject_Add(edm4hep
+  PREFIX edm4hep
+  DEPENDS podio
+  URL https://github.com/key4hep/EDM4hep/archive/refs/tags/v${EDM4HEP_VERSION}.tar.gz
+  URL_HASH SHA1=5767522f74027e0e250af6a9f7fe65ddadb8d985
+  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/edm4hep.patch
+  LIST_SEPARATOR |
+  CMAKE_ARGS
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/edm4hep/${EDM4HEP_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/root/${ROOT_VERSION}|${CMAKE_INSTALL_PREFIX}/podio/${PODIO_VERSION}
+  -DPython_EXECUTABLE=${python_exe}
+  -DBUILD_TESTING=OFF
+  -DUSE_EXTERNAL_CATCH2=OFF
+)
+
+
+file(DOWNLOAD 
+  https://patch-diff.githubusercontent.com/raw/AIDASoft/DD4hep/pull/1109.patch
+  ${CMAKE_CURRENT_BINARY_DIR}/dd4hep.patch
+  EXPECTED_HASH SHA1=95e2a8839190f74b813e77e83797d55b368559b8
+)
+
+ExternalProject_Add(dd4hep
+  PREFIX dd4hep
+  DEPENDS edm4hep
+  URL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz
+  URL_HASH SHA1=8704c457a45d28695b102f6411271741ab46280d
+  LIST_SEPARATOR |
+  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/dd4hep.patch
+  CMAKE_ARGS
+  -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
+  -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
+  -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/dd4hep/${DD4HEP_VERSION}
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/root/${ROOT_VERSION}|${CMAKE_INSTALL_PREFIX}/podio/${PODIO_VERSION}|${CMAKE_INSTALL_PREFIX}/edm4hep/${EDM4HEP_VERSION}|${CMAKE_INSTALL_PREFIX}/geant4/${GEANT4_VERSION}
+  -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DBUILD_TESTING=OFF
+  -DDD4HEP_BUILD_PACKAGES=DDG4|DDDetectors|DDRec|UtilityApps
+  -DDD4HEP_USE_GEANT4=ON
+  -DDD4HEP_USE_XERCESC=ON
+  -DDD4HEP_USE_EDM4HEP=ON
+)
+
+
