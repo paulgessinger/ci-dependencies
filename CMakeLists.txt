@@ -73,13 +73,16 @@ ExternalProject_Add(nlohmann_json
 
 ExternalProject_Add(root
   PREFIX root
+  DEPENDS nlohmann_json
   URL https://github.com/root-project/root/archive/f499987.tar.gz
   URL_HASH SHA1=29e071025dfadf865c31bf2256a383b7cf58b805
+  LIST_SEPARATOR |
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
   -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/root/${ROOT_VERSION}
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+  -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/nlohmann_json/${JSON_VERSION}
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -Dfail-on-missing=ON
   -Dgdml=ON
