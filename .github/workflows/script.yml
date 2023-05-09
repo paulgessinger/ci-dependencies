@@ -37,7 +37,9 @@ jobs:
       - name: Build
         run: |
           ccache -z
-          ./build_all.sh $BUILD_DIR $INSTALL_DIR
+          cmake -S . -B build \
+          -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
+          -DCMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
           ccache -s
 
       - uses: actions/upload-artifact@v3
