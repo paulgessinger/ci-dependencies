@@ -15,8 +15,10 @@ set(DD4HEP_VERSION 01-25-01)
 
 cmake_policy(SET CMP0135 NEW)
 
-set(CMAKE_CXX_COMPILER_LAUNCHER ccache)
-set(CMAKE_CXX_STANDARD 20)
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
+
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 find_package(Python COMPONENTS Interpreter)
