@@ -37,9 +37,9 @@ jobs:
       - name: Build
         run: |
           ccache -z
+          export CMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
           cmake -S . -B build \
           -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
-          -DCMAKE_BUILD_PARALLEL_LEVEL=$(nproc) \
           -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build build
           ccache -s
