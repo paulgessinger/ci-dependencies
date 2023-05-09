@@ -40,6 +40,7 @@ jobs:
           cmake -S . -B build \
           -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR \
           -DCMAKE_BUILD_PARALLEL_LEVEL=$(nproc)
+          cmake --build build
           ccache -s
 
       - uses: actions/upload-artifact@v3
