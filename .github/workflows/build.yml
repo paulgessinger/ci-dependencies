@@ -15,15 +15,26 @@ env:
 
 jobs:
   build_all:
-    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-13
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
+        if: 'startsWith(matrix.os, "ubuntu")'
         run: |
           sudo apt-get update
           sudo ./install_prereq_ubuntu.sh
           sudo apt-get install -y ccache
+
+      - name: Install dependencies
+        if: 'startsWith(matrix.os, "macos")'
+        run: |
+          brew install cmake eigen ninja ccache
 
       - name: Cache restore
         uses: actions/cache/restore@v3
