@@ -25,14 +25,14 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        if: 'startsWith(matrix.os, "ubuntu")'
+        if: "startsWith(matrix.os, 'ubuntu')"
         run: |
           sudo apt-get update
           sudo ./install_prereq_ubuntu.sh
           sudo apt-get install -y ccache
 
       - name: Install dependencies
-        if: 'startsWith(matrix.os, "macos")'
+        if: "startsWith(matrix.os, 'macos')"
         run: |
           brew install cmake eigen ninja ccache
 
