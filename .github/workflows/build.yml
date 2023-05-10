@@ -19,6 +19,7 @@ jobs:
       matrix:
         os:
           - ubuntu-22.04
+          - macos-12
           - macos-13
     runs-on: ${{ matrix.os }}
     steps:
@@ -42,8 +43,8 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: builddir-${{ runner.os }}-${{ github.job }}-r1
           restore-keys: |
-            builddir-${{ runner.os }}-${{ github.job }}-r1
-            builddir-${{ runner.os }}-${{ github.job }}-
+            builddir-${{ matrix.os }}-${{ github.job }}-r1
+            builddir-${{ matrix.os }}-${{ github.job }}-
 
       - name: Build
         run: |
@@ -65,4 +66,4 @@ jobs:
         if: always()
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: builddir-${{ runner.os }}-${{ github.job }}-r1
+          key: builddir-${{ matrix.os }}-${{ github.job }}-r1
