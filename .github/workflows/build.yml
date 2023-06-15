@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         if: "startsWith(matrix.os, 'macos')"
         run: |
-          brew install cmake eigen ninja ccache
+          brew install cmake eigen ninja ccache xerces-s
 
       - name: Cache restore
         uses: actions/cache/restore@v3
