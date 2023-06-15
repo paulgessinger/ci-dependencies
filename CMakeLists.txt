@@ -13,6 +13,7 @@ set(PODIO_VERSION 00-16-03)
 set(EDM4HEP_VERSION 00-07-02)
 set(DD4HEP_VERSION 01-25-01)
 
+cmake_policy(SET CMP0135 NEW)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -42,7 +43,7 @@ ExternalProject_Add(geant4
 
 ExternalProject_Add(hepmc3
   PREFIX hepmc3
-  URL https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${HEPMC3_VERSION}.tar.gz
+  URL https://gitlab.cern.ch/hepmc/HepMC3/-/archive/${HEPMC3_VERSION}/HepMC3-${HEPMC3_VERSION}.tar.gz
   URL_HASH SHA1=d4c12f5d50a507cd60cf2377286cbd23f59f1f84
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
@@ -57,12 +58,17 @@ ExternalProject_Add(hepmc3
   -DHEPMC3_ENABLE_SEARCH=OFF
 )
 
+# Hard-coding the compile flags is not ideal, but seems needed
+set(pythia_flags "")
+if(APPLE)
+  set(pythia_flags "--cxx-common=\"-isysroot ${CMAKE_OSX_SYSROOT} -O2 -std=c++11 -pedantic -W -Wall -Wshadow -fPIC -pthread\"")
+endif()
 ExternalProject_Add(pythia8
   PREFIX pythia8
   URL https://pythia.org/download/pythia83/pythia8${PYTHIA8_VERSION}.tgz
   URL_HASH SHA1=9749e3554a30ff41a52d98811d7cfef689da329d
   BUILD_IN_SOURCE ON
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} ./configure --enable-shared --prefix=${CMAKE_INSTALL_PREFIX}/pythia8/${PYTHIA8_VERSION}
+  CONFIGURE_COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX}/pythia8/${PYTHIA8_VERSION} --cxx=${CMAKE_CXX_COMPILER} ${pythia_flags}
   PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/pythia8307-cpp20.patch
 )
 
@@ -78,6 +84,11 @@ ExternalProject_Add(nlohmann_json
   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/nlohmann_json/${JSON_VERSION}
 )
+
+set(builtin_openssl OFF)
+if(APPLE)
+  set(builtin_openssl ON)
+endif()
 
 ExternalProject_Add(root
   PREFIX root
@@ -109,7 +120,7 @@ ExternalProject_Add(root
   -Dbuiltin_cfitsio=ON
   -Dbuiltin_xxhash=ON
   -Dbuiltin_afterimage=ON
-  -Dbuiltin_openssl=OFF
+  -Dbuiltin_openssl=${builtin_openssl}
   -Dbuiltin_ftgl=ON
   -Dbuiltin_gsl=ON
   -Dgfal=OFF
