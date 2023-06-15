@@ -13,7 +13,6 @@ set(PODIO_VERSION 00-16-03)
 set(EDM4HEP_VERSION 00-07-02)
 set(DD4HEP_VERSION 01-25-01)
 
-cmake_policy(SET CMP0135 NEW)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
@@ -110,8 +109,9 @@ ExternalProject_Add(root
   -Dbuiltin_cfitsio=ON
   -Dbuiltin_xxhash=ON
   -Dbuiltin_afterimage=ON
-  -Dbuiltin_openssl=ON
+  -Dbuiltin_openssl=OFF
   -Dbuiltin_ftgl=ON
+  -Dbuiltin_gsl=ON
   -Dgfal=OFF
   -Ddavix=OFF
   -Dbuiltin_vdt=ON
@@ -122,7 +122,7 @@ ExternalProject_Add(root
 file(DOWNLOAD 
   https://github.com/AIDASoft/podio/commit/09d17d49f434e23663137eadacfea4eaa3d58d48.patch
   ${CMAKE_CURRENT_BINARY_DIR}/podio.patch
-  EXPECTED_HASH SHA1=6852ffcf5aef2df0d305520d69a7b298464c1ad2
+  EXPECTED_HASH SHA1=a21af10d193109282c607e9664f4be42878220fe
 )
 
 ExternalProject_Add(podio
