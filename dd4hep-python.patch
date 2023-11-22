@@ -1,0 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 1ada9cbc..ce12e3d8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,6 +14,11 @@ SET( DD4hep_VERSION_PATCH 0 )
+ # Basic project setup #
+ #######################
+ 
++# Unbreak the python finding process
++message(STATUS "Input: ${Python_EXECUTABLE}")
++FIND_PACKAGE(Python REQUIRED COMPONENTS Interpreter Development)
++message(STATUS "Resolved to: ${Python_VERSION}")
++
+ set ( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake )
+ 
+ IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

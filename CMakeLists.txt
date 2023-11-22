@@ -8,10 +8,10 @@ set(GEANT4_VERSION 11.1.1)
 set(HEPMC3_VERSION 3.2.5)
 set(PYTHIA8_VERSION 309)
 set(JSON_VERSION 3.11.2)
-set(ROOT_VERSION 6.28.02)
-set(PODIO_VERSION 00-16-03)
-set(EDM4HEP_VERSION 00-07-02)
-set(DD4HEP_VERSION 01-25-01)
+set(ROOT_VERSION 6.28.06)
+set(PODIO_VERSION 00-17-02)
+set(EDM4HEP_VERSION 00-10-01)
+set(DD4HEP_VERSION 01-27)
 
 cmake_policy(SET CMP0135 NEW)
 
@@ -93,8 +93,8 @@ endif()
 ExternalProject_Add(root
   PREFIX root
   DEPENDS nlohmann_json
-  URL https://github.com/root-project/root/archive/f499987.tar.gz
-  URL_HASH SHA1=29e071025dfadf865c31bf2256a383b7cf58b805
+  URL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz
+  URL_HASH SHA1=fa0014eb98645bb016e5378d04fb365c47b88cfe
   LIST_SEPARATOR |
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
@@ -105,6 +105,7 @@ ExternalProject_Add(root
   -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DPython3_EXECUTABLE=${Python_EXECUTABLE}
   -Dfail-on-missing=ON
   -Dgdml=ON
   -Dx11=ON
@@ -130,18 +131,12 @@ ExternalProject_Add(root
   -Dtmva=OFF
 )
 
-file(DOWNLOAD 
-  https://github.com/AIDASoft/podio/commit/09d17d49f434e23663137eadacfea4eaa3d58d48.patch
-  ${CMAKE_CURRENT_BINARY_DIR}/podio.patch
-  EXPECTED_HASH SHA1=a21af10d193109282c607e9664f4be42878220fe
-)
 
 ExternalProject_Add(podio
   PREFIX podio
   DEPENDS root
   URL https://github.com/AIDASoft/podio/archive/refs/tags/v${PODIO_VERSION}.tar.gz
-  URL_HASH SHA1=97e4908d0fce23cf01de1dc7f1921de72319f42c
-  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/podio.patch
+  URL_HASH SHA1=600b99000f0c7a6c25c04a8b32bebf70413c9f57
   LIST_SEPARATOR |
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
@@ -156,11 +151,6 @@ ExternalProject_Add(podio
   -DUSE_EXTERNAL_CATCH2=OFF
 )
 
-file(DOWNLOAD 
-  https://patch-diff.githubusercontent.com/raw/key4hep/EDM4hep/pull/201.patch
-  ${CMAKE_CURRENT_BINARY_DIR}/edm4hep.patch
-  EXPECTED_HASH SHA1=901940d8a2ddcafb37334a0f18c25f557ed4a71f
-)
 
 
 set(venv_dir ${CMAKE_CURRENT_BINARY_DIR}/venv)
@@ -174,8 +164,7 @@ ExternalProject_Add(edm4hep
   PREFIX edm4hep
   DEPENDS podio
   URL https://github.com/key4hep/EDM4hep/archive/refs/tags/v${EDM4HEP_VERSION}.tar.gz
-  URL_HASH SHA1=5767522f74027e0e250af6a9f7fe65ddadb8d985
-  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/edm4hep.patch
+  URL_HASH SHA1=7781f6c85bd2e88480b699a3a554182fd8bb75bf
   LIST_SEPARATOR |
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
@@ -191,19 +180,14 @@ ExternalProject_Add(edm4hep
 )
 
 
-file(DOWNLOAD 
-  https://patch-diff.githubusercontent.com/raw/AIDASoft/DD4hep/pull/1109.patch
-  ${CMAKE_CURRENT_BINARY_DIR}/dd4hep.patch
-  EXPECTED_HASH SHA1=95e2a8839190f74b813e77e83797d55b368559b8
-)
 
 ExternalProject_Add(dd4hep
   PREFIX dd4hep
-  DEPENDS edm4hep
+  DEPENDS edm4hep geant4
   URL https://github.com/AIDASoft/DD4hep/archive/v${DD4HEP_VERSION}.tar.gz
-  URL_HASH SHA1=8704c457a45d28695b102f6411271741ab46280d
+  URL_HASH SHA1=3e8a1d07a72689a24db04466b263094bbe16240f
   LIST_SEPARATOR |
-  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_BINARY_DIR}/dd4hep.patch
+  PATCH_COMMAND patch -p1 -i ${CMAKE_CURRENT_SOURCE_DIR}/dd4hep-python.patch
   BUILD_COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/geant4/${GEANT4_VERSION}/lib CMAKE_BUILD_PARALLEL_LEVEL=${CMAKE_BUILD_PARALLEL_LEVEL} ${CMAKE_COMMAND} --build <BINARY_DIR>
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/geant4/${GEANT4_VERSION}/lib  ${CMAKE_COMMAND} -S <SOURCE_DIR> -B <BINARY_DIR>
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
