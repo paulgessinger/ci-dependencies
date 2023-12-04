@@ -8,7 +8,8 @@ set(GEANT4_VERSION 11.1.1)
 set(HEPMC3_VERSION 3.2.5)
 set(PYTHIA8_VERSION 309)
 set(JSON_VERSION 3.11.2)
-set(ROOT_VERSION 6.28.06)
+set(ROOT_VERSION 6.30.02)
+set(ROOT_HASH SHA1=8fc49479265ccf493cfe9bb36ab1c1f23967b99a)
 set(PODIO_VERSION 00-17-02)
 set(EDM4HEP_VERSION 00-10-01)
 set(DD4HEP_VERSION 01-27)
@@ -86,15 +87,12 @@ ExternalProject_Add(nlohmann_json
 )
 
 set(builtin_openssl OFF)
-if(APPLE)
-  set(builtin_openssl ON)
-endif()
 
 ExternalProject_Add(root
   PREFIX root
   DEPENDS nlohmann_json
   URL https://root.cern/download/root_v${ROOT_VERSION}.source.tar.gz
-  URL_HASH SHA1=fa0014eb98645bb016e5378d04fb365c47b88cfe
+  URL_HASH ${ROOT_HASH}
   LIST_SEPARATOR |
   CMAKE_ARGS
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
@@ -103,6 +101,7 @@ ExternalProject_Add(root
   -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX}/nlohmann_json/${JSON_VERSION}
   -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+  -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
   -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DPython3_EXECUTABLE=${Python_EXECUTABLE}
@@ -121,7 +120,7 @@ ExternalProject_Add(root
   -Dbuiltin_cfitsio=ON
   -Dbuiltin_xxhash=ON
   -Dbuiltin_afterimage=ON
-  -Dbuiltin_openssl=${builtin_openssl}
+  -Dbuiltin_openssl=OFF
   -Dbuiltin_ftgl=ON
   -Dbuiltin_gsl=ON
   -Dgfal=OFF
@@ -158,6 +157,7 @@ if(NOT IS_DIRECTORY ${venv_dir})
   execute_process(COMMAND ${Python_EXECUTABLE} -m venv ${venv_dir})
 endif()
 set(python_exe ${venv_dir}/bin/python)
+execute_process(COMMAND ${python_exe} -m pip install --upgrade pip)
 execute_process(COMMAND ${python_exe} -m pip install jinja2 pyyaml)
 
 ExternalProject_Add(edm4hep
