@@ -4,7 +4,7 @@ project(ActsDependencies)
 include(ExternalProject)
 include(GNUInstallDirs)
 
-set(GEANT4_VERSION 11.1.1)
+set(GEANT4_VERSION 11.1.3)
 set(HEPMC3_VERSION 3.2.5)
 set(PYTHIA8_VERSION 309)
 set(JSON_VERSION 3.11.2)
@@ -27,7 +27,7 @@ find_package(Python COMPONENTS Interpreter)
 ExternalProject_Add(geant4 
   PREFIX geant4
   URL https://gitlab.cern.ch/geant4/geant4/-/archive/v${GEANT4_VERSION}/geant4-v${GEANT4_VERSION}.tar.gz
-  URL_HASH SHA1=7d1c4a2577468d32ca04436a977d434c1c69cb93
+  URL_HASH SHA1=69119e8a29d3bd79b70886dc7ae78e6d008e1753
   CMAKE_ARGS 
   -DCMAKE_CXX_COMPILER_LAUNCHER=${CMAKE_CXX_COMPILER_LAUNCHER}
   -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}
