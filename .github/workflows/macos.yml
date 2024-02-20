@@ -111,6 +111,8 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
+      - uses: actions/checkout@v3
+
       - name: Configure
         run: ${CONFIGURE}
 
