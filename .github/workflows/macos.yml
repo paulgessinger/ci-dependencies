@@ -40,8 +40,8 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: nlohmann_json
-          path: ${{ env.INSTALL_DIR }}/nlohmann_json
+          name: build_1
+          path: ${{ env.BUILD_DIR }}
 
   build_root:
     runs-on: macos-14
@@ -66,7 +66,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: nlohmann_json
+          name: build_1
           path: .
 
       - name: Configure
