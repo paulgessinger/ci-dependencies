@@ -9,15 +9,9 @@ env:
   CCACHE_DIR: ${{ github.workspace }}/ccache
   CCACHE_MAXSIZE: 10G
 
-.install_deps: 
-  - &install_deps
-    name: Install dependencies
-    run: brew install python@3.12 cmake ccache
+  INSTALL_DEPENDENCIES: brew install python@3.12 cmake ccache
 
-.configure:
-  - &configure
-    name: Configure
-    run: cmake -S ${{ github.workspace }} -B ${BUILD_DIR} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
+  CONFIGURE: cmake -S ${{ github.workspace }} -B ${BUILD_DIR} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
 
 jobs:
   # build_python:
@@ -105,7 +99,8 @@ jobs:
   build_xercesc:
     runs-on: macos-14
     steps:
-      - <<: *install_deps
+      - name: Install dependencies
+        run: ${INSTALL_DEPENDENCIES}
 
       - name: Cache build
         uses: actions/cache@v3
@@ -116,7 +111,8 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      - <<: *configure
+      - name: Configure
+        run: ${CONFIGURE}
 
       - name: Build
         run: > 
