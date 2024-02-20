@@ -13,7 +13,7 @@ env:
 
 jobs:
   
-  build_json:
+  build_nlohmann_json:
     runs-on: macos-14
     steps:
       - name: Install dependencies
@@ -23,9 +23,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ runner.os }}-${{ github.job }}-json
+          key: ccache-${{ runner.os }}-${{ github.job }}-nlohmann_json
           restore-keys: |
-            ccache-${{ runner.os }}-${{ github.job }}-json
+            ccache-${{ runner.os }}-${{ github.job }}-nlohmann_json
             ccache-${{ runner.os }}-${{ github.job }}-
 
       - uses: actions/checkout@v3
@@ -36,18 +36,18 @@ jobs:
 
       - name: Build
         run: > 
-          cmake --build ${BUILD_DIR} -- json -j2
+          cmake --build ${BUILD_DIR} -- nlohmann_json -j2
 
       - uses: actions/upload-artifact@v3
         with:
-          name: json
-          path: ${{ env.INSTALL_DIR }}/json
+          name: nlohmann_json
+          path: ${{ env.INSTALL_DIR }}/nlohmann_json
 
   build_root:
     runs-on: macos-14
 
     needs:
-      - build_json
+      - build_nlohmann_json
 
     steps:
       - name: Install dependencies
@@ -66,7 +66,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: json
+          name: nlohmann_json
           path: .
 
       - name: Configure
