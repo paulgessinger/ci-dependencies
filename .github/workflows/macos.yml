@@ -529,7 +529,7 @@ jobs:
           name: python
           path: .
 
-      - run: sudo tar xf pythia8.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
 
       - name: Build
         run: >
