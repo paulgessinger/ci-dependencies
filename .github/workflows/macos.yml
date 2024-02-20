@@ -20,7 +20,7 @@ jobs:
         run: ${INSTALL_DEPENDENCIES}
 
       - name: Cache build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ runner.os }}-${{ github.job }}-nlohmann_json
@@ -28,7 +28,7 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-nlohmann_json
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Configure
         run: cmake -S ${{ github.workspace }} -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
@@ -39,9 +39,11 @@ jobs:
           cmake --build ${BUILD_DIR} -- nlohmann_json -j2
 
       - name: Package build
-        run: tar czf build.tar.gz -C ${BUILD_DIR} .
+        run: |
+          tar czf build.tar.gz -C ${BUILD_DIR} .
+          tar czf install.tar.gz -C ${INSTALL_DIR} .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build_1
           path: build.tar.gz
@@ -56,7 +58,7 @@ jobs:
         run: ${INSTALL_DEPENDENCIES}
 
       - name: Cache build
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ runner.os }}-${{ github.job }}-root
@@ -64,14 +66,18 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-root
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: build_1
           path: .
 
-      - run: mkdir ${BUILD_DIR} && tar xf build.tar.gz -C ${BUILD_DIR}
+      - run: |
+          mkdir ${BUILD_DIR}
+          tar xf build.tar.gz -C ${BUILD_DIR}
+          mkdir ${INSTALL_DIR}
+          tar xf build.tar.gz -C ${INSTALL_DIR}
 
       - name: Configure
         run: cmake -S ${{ github.workspace }} -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
