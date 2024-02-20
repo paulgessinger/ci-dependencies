@@ -532,6 +532,8 @@ jobs:
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
       - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
 
+      - run: ls -al ${DEPENDENCY_DIR}/include
+
       - name: Build
         run: >
           curl -SL https://pythia.org/download/pythia8${PYTHIA8_VERSION:0:1}/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
