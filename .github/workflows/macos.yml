@@ -537,7 +537,7 @@ jobs:
           curl -SL https://pythia.org/download/pythia8${PYTHIA8_VERSION:0:1}/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
           && mv pythia8* ${SRC_DIR}
           && cd ${SRC_DIR}
-          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR} --with-python=${DEPENDENCY_DIR}
+          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR} --with-python-include=${DEPENDENCY_DIR}/include
           && make -j2
           && make install
           && tar czf ../pythia8.tar.gz -C ${INSTALL_DIR} .
