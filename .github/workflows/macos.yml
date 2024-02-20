@@ -9,92 +9,11 @@ env:
   CCACHE_DIR: ${{ github.workspace }}/ccache
   CCACHE_MAXSIZE: 10G
 
-  INSTALL_DEPENDENCIES: brew install python@3.12 cmake ccache
+  INSTALL_DEPENDENCIES: brew install python@3.12 cmake ccache xerces-c eigen boost tbb
 
 jobs:
-  # build_python:
-    # runs-on: macos-14
-    # steps:
-      # - name: Install dependencies
-        # run: |
-          # brew install ccache openssl@3
-          # brew unlink gettext
 
-      # - name: Cache build
-        # uses: actions/cache@v3
-        # with:
-          # path: ${{ env.BUILD_DIR }}
-          # key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-          # restore-keys: |
-            # builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-            # builddir-${{ runner.os }}-${{ github.job }}-
-
-      # - name: Build
-        # run: >
-          # curl -SL https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz | tar -xzC .
-          # && mv Python-* ${SRC_DIR} && cd ${SRC_DIR}
-          # && export CC="ccache $CC"
-          # && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-          # && ${SRC_DIR}/configure
-          # --prefix=${DEPENDENCY_DIR}
-          # --enable-optimizations
-          # --with-ensurepip=install
-          # --with-openssl=$(brew --prefix openssl)
-          # && make -j2
-          # && sudo make install
-          # && tar czf ../python.tar.gz -C ${DEPENDENCY_DIR} .
-
-      # - uses: actions/upload-artifact@v3
-        # with:
-          # name: python
-          # path: python.tar.gz
-
-  # build_boost:
-    # runs-on: macos-14
-    # steps:
-      # - name: Install dependencies
-        # run: brew install ccache
-
-      # - name: Cache build
-        # uses: actions/cache@v3
-        # with:
-          # path: ${{ env.BUILD_DIR }}
-          # key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.BOOST_VERSION }}
-          # restore-keys: |
-            # builddir-${{ runner.os }}-${{ github.job }}-${{ env.BOOST_VERSION }}
-            # builddir-${{ runner.os }}-${{ github.job }}-
-
-      # - name: Build
-        # run: >
-          # curl -SL https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION//./_}.tar.gz | tar -xzC .
-          # && mv boost_* ${SRC_DIR} && cd ${SRC_DIR}
-          # && export CC="ccache $CC"
-          # && export CXX="ccache $CXX"
-          # && ./bootstrap.sh 
-          # --prefix=${INSTALL_DIR}
-          # && ./b2 install
-          # --build-dir=${BUILD_DIR}
-          # && tar czf ../boost.tar.gz -C ${INSTALL_DIR} .
-
-      # - uses: actions/upload-artifact@v3
-        # with:
-          # name: boost
-          # path: boost.tar.gz
-
-  # build_tbb:
-    # runs-on: ubuntu-latest # we don't actually need macOS here
-    # steps:
-      # - name: Download
-        # run: >
-          # curl -SL https://github.com/oneapi-src/oneTBB/releases/download/v${TBB_VERSION}/oneapi-tbb-${TBB_VERSION}-mac.tgz | tar -xzC .
-          # && tar czf tbb.tar.gz -C oneapi-tbb-* .
-
-      # - uses: actions/upload-artifact@v3
-        # with:
-          # name: tbb
-          # path: tbb.tar.gz
-
-  build_xercesc:
+  build_root:
     runs-on: macos-14
     steps:
       - name: Install dependencies
@@ -117,12 +36,12 @@ jobs:
 
       - name: Build
         run: > 
-          cmake --build ${BUILD_DIR}
+          cmake --build ${BUILD_DIR} -- root -j2
 
-      # - uses: actions/upload-artifact@v3
-        # with:
-          # name: xercesc
-          # path: xercesc.tar.gz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: root
+          path: ${{ env.INSTALL_PREFIX }}/root
 
   # build_root:
     # runs-on: macos-14
