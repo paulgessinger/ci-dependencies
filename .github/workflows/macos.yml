@@ -509,6 +509,8 @@ jobs:
 
   build_pythia8:
     runs-on: macos-14
+    needs: 
+      - build_python
     steps:
       - name: Install dependencies
         run: brew install ccache
@@ -522,12 +524,19 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.PYTHIA8_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
+
+      - run: sudo tar xf pythia8.tar.gz -C ${DEPENDENCY_DIR}
+
       - name: Build
         run: >
           curl -SL https://pythia.org/download/pythia8${PYTHIA8_VERSION:0:1}/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
           && mv pythia8* ${SRC_DIR}
           && cd ${SRC_DIR}
-          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR}
+          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR} --with-python=${DEPENDENCY_DIR}
           && make -j2
           && make install
           && tar czf ../pythia8.tar.gz -C ${INSTALL_DIR} .
