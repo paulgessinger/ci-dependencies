@@ -46,7 +46,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: build_1
-          path: build.tar.gz
+          path: |
+            build.tar.gz
+            install.tar.gz
 
   build_root:
     runs-on: macos-14
