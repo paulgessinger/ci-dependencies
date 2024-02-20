@@ -38,16 +38,18 @@ jobs:
         run: > 
           cmake --build ${BUILD_DIR} -- nlohmann_json -j2
 
+      - name: Package build
+        run: tar czf build.tar.gz -C ${BUILD_DIR} .
+
       - uses: actions/upload-artifact@v3
         with:
           name: build_1
-          path: ${{ env.BUILD_DIR }}
+          path: build.tar.gz
 
   build_root:
     runs-on: macos-14
 
-    needs:
-      - build_nlohmann_json
+    needs: [build_nlohmann_json]
 
     steps:
       - name: Install dependencies
@@ -68,6 +70,8 @@ jobs:
         with:
           name: build_1
           path: .
+
+      - run: tar xf build.tar.gz -C ${BUILD_DIR}
 
       - name: Configure
         run: cmake -S ${{ github.workspace }} -B ${{ env.BUILD_DIR }} -DCMAKE_INSTALL_PREFIX=${{ env.INSTALL_DIR }} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
