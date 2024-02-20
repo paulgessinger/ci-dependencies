@@ -1,32 +1,25 @@
-# name: macOS
+name: macOS
 
-# on: [push, pull_request]
+on: [push, pull_request]
 
-# env:
-  # SRC_DIR: ${{ github.workspace }}/src
-  # BUILD_DIR: ${{ github.workspace }}/build
-  # DEPENDENCY_DIR: /usr/local/acts
-  # INSTALL_DIR: ${{ github.workspace }}/install
+env:
+  BUILD_DIR: ${{ github.workspace }}/build
+  INSTALL_DIR: ${{ github.workspace }}/install
 
-  # CCACHE_DIR: ${{ github.workspace }}/ccache
-  # CCACHE_MAXSIZE: 10G
+  CCACHE_DIR: ${{ github.workspace }}/ccache
+  CCACHE_MAXSIZE: 10G
 
-  # CC: clang
-  # CXX: clang++
+.install_deps: 
+  - &install_deps
+    name: Install dependencies
+    run: brew install python@3.12 cmake ccache
 
-  # PYTHON_VERSION: 3.10.7
-  # XERCESC_VERSION: 3.2.2
-  # ROOT_VERSION: 6.28.02
-  # GEANT4_VERSION: 11.1.1
-  # DD4HEP_VERSION: 01-25-01
-  # BOOST_VERSION: 1.78.0
-  # TBB_VERSION: 2021.5.0
-  # HEPMC_VERSION: 3.2.5
-  # PYTHIA8_VERSION: 309
-  # PODIO_VERSION: v00-16-03
-  # EDM4HEP_VERSION: v00-07-02
+.configure:
+  - &configure
+    name: Configure
+    run: cmake -S ${{ github.workspace }} -B ${BUILD_DIR} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} -DPython_EXECUTABLE=/opt/homebrew/bin/python3.12
 
-# jobs:
+jobs:
   # build_python:
     # runs-on: macos-14
     # steps:
@@ -109,33 +102,25 @@
           # name: tbb
           # path: tbb.tar.gz
 
-  # build_xercesc:
-    # runs-on: macos-14
-    # steps:
-      # - name: Install dependencies
-        # run: brew install cmake ccache
+  build_xercesc:
+    runs-on: macos-14
+    steps:
+      - <<: *install_deps
 
-      # - name: Cache build
-        # uses: actions/cache@v3
-        # with:
-          # path: ${{ env.CCACHE_DIR }}
-          # key: ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
-          # restore-keys: |
-            # ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
-            # ccache-${{ runner.os }}-${{ github.job }}-
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ github.job }}-${{ env.XERCESC_VERSION }}
+            ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - name: Build
-        # run: >
-          # curl -SL https://github.com/apache/xerces-c/archive/v${XERCESC_VERSION}.tar.gz | tar -xzC . 
-          # && mv xerces-c-* ${SRC_DIR}
-          # && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-          # && cmake ${SRC_DIR}
-          # -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-          # -DCMAKE_BUILD_TYPE=Release
-          # -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
-          # && make -j2
-          # && make install 
-          # && tar czf ../xercesc.tar.gz -C ${INSTALL_DIR} .
+      - <<: *configure
+
+      - name: Build
+        run: > 
+          cmake --build ${BUILD_DIR}
 
       # - uses: actions/upload-artifact@v3
         # with:
