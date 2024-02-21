@@ -151,7 +151,9 @@ jobs:
       - build_tbb
     steps:
       - name: Install dependencies
-        run: brew install cmake ccache openssl@3
+        run: |
+          brew install cmake ccache openssl@3
+          brew unlink r
 
       - name: Cache build
         uses: actions/cache@v3
