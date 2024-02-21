@@ -14,7 +14,7 @@ env:
   CC: clang
   CXX: clang++
 
-  DEPENDENCIES: cmake ccache python@3.12
+  DEPENDENCIES: cmake ccache #python@3.12
 
   PYTHON_VERSION: 3.10.7
   XERCESC_VERSION: 3.2.2
@@ -515,7 +515,7 @@ jobs:
       # - build_python
     steps:
       - name: Install dependencies
-        run: brew install ccache
+        run: brew install ${DEPENDENCIES}
 
       - name: Cache build
         uses: actions/cache@v3
