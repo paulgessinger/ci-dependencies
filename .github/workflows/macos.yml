@@ -37,14 +37,14 @@ jobs:
           brew install ccache openssl@3
           brew unlink gettext
 
-      - name: Cache build
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.BUILD_DIR }}
-          key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-          restore-keys: |
-            builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-            builddir-${{ runner.os }}-${{ github.job }}-
+      # - name: Cache build
+        # uses: actions/cache@v3
+        # with:
+          # path: ${{ env.BUILD_DIR }}
+          # key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+          # restore-keys: |
+            # builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+            # builddir-${{ runner.os }}-${{ github.job }}-
 
       - name: Build
         run: >
