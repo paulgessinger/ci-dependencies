@@ -57,7 +57,9 @@ jobs:
 
     steps:
       - name: Install dependencies
-        run: ${INSTALL_DEPENDENCIES}
+        run: |
+          ${INSTALL_DEPENDENCIES}
+          brew unlink r
 
       - name: Cache build
         uses: actions/cache@v4
