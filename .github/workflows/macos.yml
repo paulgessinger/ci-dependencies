@@ -511,7 +511,7 @@ jobs:
 
   build_pythia8:
     runs-on: macos-13
-    needs: 
+    # needs: 
       # - build_python
     steps:
       - name: Install dependencies
