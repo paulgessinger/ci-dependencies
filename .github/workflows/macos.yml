@@ -29,48 +29,48 @@ env:
   EDM4HEP_VERSION: v00-10-01
 
 jobs:
-  # build_python:
-    # runs-on: macos-13
-    # steps:
-      # - name: Install dependencies
-        # run: |
-          # brew install ${DEPENDENCIES} openssl@3
-          # brew unlink gettext
+  build_python:
+    runs-on: macos-13
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install ccache openssl@3
+          brew unlink gettext
 
-      # - name: Cache build
-        # uses: actions/cache@v3
-        # with:
-          # path: ${{ env.BUILD_DIR }}
-          # key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-          # restore-keys: |
-            # builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
-            # builddir-${{ runner.os }}-${{ github.job }}-
+      - name: Cache build
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.BUILD_DIR }}
+          key: builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+          restore-keys: |
+            builddir-${{ runner.os }}-${{ github.job }}-${{ env.PYTHON_VERSION }}-r1
+            builddir-${{ runner.os }}-${{ github.job }}-
 
-      # - name: Build
-        # run: >
-          # curl -SL https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz | tar -xzC .
-          # && mv Python-* ${SRC_DIR} && cd ${SRC_DIR}
-          # && export CC="ccache $CC"
-          # && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
-          # && ${SRC_DIR}/configure
-          # --prefix=${DEPENDENCY_DIR}
-          # --enable-optimizations
-          # --with-ensurepip=install
-          # --with-openssl=$(brew --prefix openssl)
-          # && make -j2
-          # && sudo make install
-          # && tar czf ../python.tar.gz -C ${DEPENDENCY_DIR} .
+      - name: Build
+        run: >
+          curl -SL https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tgz | tar -xzC .
+          && mv Python-* ${SRC_DIR} && cd ${SRC_DIR}
+          && export CC="ccache $CC"
+          && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
+          && ${SRC_DIR}/configure
+          --prefix=${DEPENDENCY_DIR}
+          --enable-optimizations
+          --with-ensurepip=install
+          --with-openssl=$(brew --prefix openssl)
+          && make -j2
+          && sudo make install
+          && tar czf ../python.tar.gz -C ${DEPENDENCY_DIR} .
 
-      # - uses: actions/upload-artifact@v3
-        # with:
-          # name: python
-          # path: python.tar.gz
+      - uses: actions/upload-artifact@v3
+        with:
+          name: python
+          path: python.tar.gz
 
   build_boost:
     runs-on: macos-13
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES}
+        run: brew install ccache
 
       - name: Cache build
         uses: actions/cache@v3
@@ -115,7 +115,7 @@ jobs:
     runs-on: macos-13
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES}
+        run: brew install cmake ccache
 
       - name: Cache build
         uses: actions/cache@v3
@@ -147,11 +147,11 @@ jobs:
   build_root:
     runs-on: macos-13
     needs:
-      # - build_python
+      - build_python
       - build_tbb
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES} openssl@3
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -162,17 +162,17 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.ROOT_VERSION }}-r1
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: tbb
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
 
       - name: Build
@@ -209,7 +209,7 @@ jobs:
       - build_xercesc
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES}
+        run: brew install cmake ccache
 
       - name: Cache build
         uses: actions/cache@v3
@@ -252,11 +252,11 @@ jobs:
   build_podio:
     runs-on: macos-13
     needs:
-      # - build_python
+      - build_python
       - build_root
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES} openssl@3
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -267,17 +267,17 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.PODIO_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: root
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf root.tar.gz -C ${DEPENDENCY_DIR}
 
       - name: Install Python dependencies
@@ -308,12 +308,12 @@ jobs:
   build_edm4hep:
     runs-on: macos-13
     needs:
-      # - build_python
+      - build_python
       - build_root
       - build_podio
     steps:
       - name: Install dependencies
-        run: brew install ${DEPENDENCIES} openssl@3
+        run: brew install cmake ccache openssl@3
 
       - name: Cache build
         uses: actions/cache@v3
@@ -324,10 +324,10 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.EDM4HEP_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: root
@@ -338,7 +338,7 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf root.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf podio.tar.gz -C ${DEPENDENCY_DIR}
 
@@ -371,7 +371,7 @@ jobs:
   build_dd4hep:
     runs-on: macos-13
     needs:
-      # - build_python
+      - build_python
       - build_boost
       - build_tbb
       - build_xercesc
@@ -382,7 +382,7 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          brew install ${DEPENDENCIES} openssl@3
+          brew install cmake ccache openssl@3
           brew unlink gettext
 
       - name: Cache build
@@ -394,10 +394,10 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.DD4HEP_VERSION }}-r1
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: boost
@@ -428,7 +428,7 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf boost.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf xercesc.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
@@ -511,8 +511,8 @@ jobs:
 
   build_pythia8:
     runs-on: macos-13
-    # needs: 
-      # - build_python
+    needs: 
+      - build_python
     steps:
       - name: Install dependencies
         run: brew install ${DEPENDENCIES}
@@ -526,22 +526,22 @@ jobs:
             ccache-${{ runner.os }}-${{ github.job }}-${{ env.PYTHIA8_VERSION }}
             ccache-${{ runner.os }}-${{ github.job }}-
 
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
 
-      # - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo mkdir -p ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
 
-      # - run: ls -al ${DEPENDENCY_DIR}/include/python3.10
+      - run: ls -al ${DEPENDENCY_DIR}/include/python3.10
 
       - name: Build
         run: >
           curl -SL https://pythia.org/download/pythia8${PYTHIA8_VERSION:0:1}/pythia8${PYTHIA8_VERSION}.tgz | tar -xzC .
           && mv pythia8* ${SRC_DIR}
           && cd ${SRC_DIR}
-          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR} --with-python-include=$(python3.12-config --prefix)/include/python3.12
+          && CC="ccache $CC" CXX="ccache $CXX" ./configure --prefix=${INSTALL_DIR} --with-python-include=${DEPENDENCY_DIR}/include/python3.10
           && make -j2
           && make install
           && tar czf ../pythia8.tar.gz -C ${INSTALL_DIR} .
@@ -554,7 +554,7 @@ jobs:
   make_tarball:
     runs-on: ubuntu-latest # we don't need macOS here
     needs: 
-      # - build_python
+      - build_python
       - build_tbb
       - build_xercesc
       - build_root
@@ -565,10 +565,10 @@ jobs:
       - build_edm4hep
       - build_dd4hep
     steps:
-      # - uses: actions/download-artifact@v3
-        # with:
-          # name: python
-          # path: .
+      - uses: actions/download-artifact@v3
+        with:
+          name: python
+          path: .
       - uses: actions/download-artifact@v3
         with:
           name: boost
@@ -611,7 +611,7 @@ jobs:
           path: .
 
       - run: sudo mkdir -p ${DEPENDENCY_DIR}
-      # - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
+      - run: sudo tar xf python.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf tbb.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf boost.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf xercesc.tar.gz -C ${DEPENDENCY_DIR}
