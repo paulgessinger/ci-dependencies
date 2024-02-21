@@ -30,7 +30,7 @@ env:
 
 jobs:
   build_python:
-    runs-on: macos-13
+    runs-on: macos-11
     steps:
       - name: Install dependencies
         run: |
@@ -67,7 +67,7 @@ jobs:
           path: python.tar.gz
 
   build_boost:
-    runs-on: macos-13
+    runs-on: macos-11
     steps:
       - name: Install dependencies
         run: brew install ccache
@@ -112,7 +112,7 @@ jobs:
           path: tbb.tar.gz
 
   build_xercesc:
-    runs-on: macos-13
+    runs-on: macos-11
     steps:
       - name: Install dependencies
         run: brew install cmake ccache
@@ -145,7 +145,7 @@ jobs:
           path: xercesc.tar.gz
 
   build_root:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_python
       - build_tbb
@@ -204,7 +204,7 @@ jobs:
           path: root.tar.gz
 
   build_geant4:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_xercesc
     steps:
@@ -250,7 +250,7 @@ jobs:
           path: geant4.tar.gz
 
   build_podio:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_python
       - build_root
@@ -306,7 +306,7 @@ jobs:
           path: podio.tar.gz
 
   build_edm4hep:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_python
       - build_root
@@ -369,7 +369,7 @@ jobs:
           path: edm4hep.tar.gz
 
   build_dd4hep:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_python
       - build_boost
@@ -465,7 +465,7 @@ jobs:
           path: dd4hep.tar.gz
 
   build_hepmc3:
-    runs-on: macos-13
+    runs-on: macos-11
     needs:
       - build_root
     steps:
@@ -510,7 +510,7 @@ jobs:
           path: hepmc3.tar.gz
 
   build_pythia8:
-    runs-on: macos-13
+    runs-on: macos-11
     needs: 
       - build_python
     steps:
