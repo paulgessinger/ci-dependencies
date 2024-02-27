@@ -456,6 +456,7 @@ jobs:
           -DCMAKE_CXX_STANDARD=17
           -DCMAKE_PREFIX_PATH=${DEPENDENCY_DIR}
           -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}
+          -DPython_EXECUTABLE=${DEPENDENCY_DIR}/bin/python3.10
           -DBUILD_DOCS=OFF
           && make -j2
           && make install
