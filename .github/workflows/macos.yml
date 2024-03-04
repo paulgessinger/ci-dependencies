@@ -439,6 +439,8 @@ jobs:
       - run: sudo tar xf podio.tar.gz -C ${DEPENDENCY_DIR}
       - run: sudo tar xf edm4hep.tar.gz -C ${DEPENDENCY_DIR}
 
+      - uses: actions/checkout@v4
+
       - name: Build DD4hep
         run: >
           curl -SL https://github.com/AIDASoft/DD4hep/archive/refs/tags/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
