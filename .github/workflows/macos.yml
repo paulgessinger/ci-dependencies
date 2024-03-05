@@ -445,7 +445,7 @@ jobs:
         run: >
           curl -SL https://github.com/AIDASoft/DD4hep/archive/refs/tags/v${DD4HEP_VERSION}.tar.gz | tar -xzC .
           && mv DD4hep-* ${SRC_DIR}
-          && patch -d ${SRC_DIR} -p1 -i dd4hep-python.patch
+          && patch -d ${SRC_DIR} -p1 -i ${{ github.workspace  }}/dd4hep-python.patch
           && mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
           && export PATH="$DEPENDENCY_DIR/bin:$PATH"
           && cmake ${SRC_DIR}
