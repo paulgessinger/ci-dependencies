@@ -95,7 +95,7 @@ jobs:
           && export CXX="ccache $CXX"
           && ./bootstrap.sh 
           --prefix=${INSTALL_DIR}
-          && ./b2 install
+          && ./b2 -address-model=64 architecture=x86 install
           --build-dir=${BUILD_DIR}
           && tar czf ../boost.tar.gz -C ${INSTALL_DIR} .
 
