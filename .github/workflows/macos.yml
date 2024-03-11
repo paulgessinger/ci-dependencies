@@ -32,6 +32,9 @@ jobs:
   build_python:
     runs-on: macos-13
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: |
           brew install ccache openssl@3
@@ -69,6 +72,9 @@ jobs:
   build_boost:
     runs-on: macos-13
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install ccache
 
@@ -101,6 +107,9 @@ jobs:
   build_tbb:
     runs-on: ubuntu-latest # we don't actually need macOS here
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Download
         run: >
           curl -SL https://github.com/oneapi-src/oneTBB/releases/download/v${TBB_VERSION}/oneapi-tbb-${TBB_VERSION}-mac.tgz | tar -xzC .
@@ -114,6 +123,9 @@ jobs:
   build_xercesc:
     runs-on: macos-13
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install cmake ccache
 
@@ -150,6 +162,9 @@ jobs:
       - build_python
       - build_tbb
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: |
           brew install cmake ccache openssl@3
@@ -210,6 +225,9 @@ jobs:
     needs:
       - build_xercesc
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install cmake ccache
 
@@ -257,6 +275,9 @@ jobs:
       - build_python
       - build_root
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install cmake ccache openssl@3
 
@@ -314,6 +335,9 @@ jobs:
       - build_root
       - build_podio
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install cmake ccache openssl@3
 
@@ -382,6 +406,9 @@ jobs:
       - build_podio
       - build_edm4hep
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: |
           brew install cmake ccache openssl@3
@@ -475,6 +502,9 @@ jobs:
     needs:
       - build_root
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install cmake ccache
 
@@ -520,6 +550,9 @@ jobs:
     needs: 
       - build_python
     steps:
+      - name: Print architecture
+        run: uname -p
+
       - name: Install dependencies
         run: brew install ${DEPENDENCIES}
 
