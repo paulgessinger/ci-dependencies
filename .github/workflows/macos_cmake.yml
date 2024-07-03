@@ -328,7 +328,9 @@ jobs:
   build_dd4hep:
     runs-on: macos-14
 
-    needs: [build_geant4]
+    needs: 
+      - build_geant4
+      - build_boost_eigen
 
     steps:
       - uses: actions/checkout@v4
@@ -468,9 +470,7 @@ jobs:
 
   make_tarball:
     runs-on: ubuntu-latest # we don't need macOS here
-    needs: 
-      - build_pythia8
-      - build_boost_eigen
+    needs: [build_pythia8]
     steps:
       - uses: actions/download-artifact@v4
         with:
