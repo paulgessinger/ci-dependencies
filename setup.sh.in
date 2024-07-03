@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+set -u
+
+function add_dep() {
+  pkg=$1
+  ver=$2
+  export CMAKE_PREFIX_PATH="@CMAKE_INSTALL_PREFIX@/$pkg/$ver:$CMAKE_PREFIX_PATH"
+}
+
+add_dep python @PYTHON_VERSION@
+add_dep tbb @TBB_VERSION@
+add_dep geant4 @GEANT4_VERSION@
+add_dep hepmc3 @HEPMC3_VERSION@
+add_dep pythia8 @PYTHIA8_VERSION@
+add_dep nlohmann_json @JSON_VERSION@
+add_dep root @ROOT_VERSION@
+add_dep podio @PODIO_VERSION@
+add_dep edm4hep @EDM4HEP_VERSION@
+add_dep dd4hep @DD4HEP_VERSION@
+add_dep boost @BOOST_VERSION@
+add_dep eigen @EIGEN_VERSION@
