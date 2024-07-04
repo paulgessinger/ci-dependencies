@@ -370,11 +370,16 @@ jobs:
           mkdir -p install_boost_eigen
           tar xf install.tar.gz -C install_boost_eigen
           rm install.tar.gz
+          mkdir -p build_boost_eigen
+          tar xf build.tar.gz -C build_boost_eigen
+          rm build.tar.gz
 
       - name: Merge directories
         run: |
           cp -r install_boost_eigen/* ${INSTALL_DIR}
           rm -rf install_boost_eigen
+          cp -r build_boost_eigen/boost ${BUILD_DIR}
+          rm -rf build_boost_eigen
 
       - name: Build
         run: > 
